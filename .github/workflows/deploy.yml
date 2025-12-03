@@ -1,23 +1,27 @@
-name: deploy
+name: Deploy
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main  # Cambia por la rama que uses para deploy
 
 jobs:
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-22.04
+
     steps:
-      - name: Deploy
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.IP }}
           port: 2222
           username: Jordi
-          key: ${{secrets.PRIVATE_KEY}}
+          key: ${{ secrets.PRIVATE_KEY }}
           script: |
             cd /var/www/html/Oxyra/
-            git reset --hard; git pull
+            git reset --hard
+            git pull
             cd frontend
             npm install
             npm run build
