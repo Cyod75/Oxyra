@@ -1,7 +1,7 @@
 import "./App.css";
 // IMPORTACIONES CORREGIDAS
-import MobileView from "./components/MobileView";
-import DesktopView from "./components/DesktopView";
+import MobileView from "./views/MobileView";
+import DesktopView from "./views/DesktopView";
 
 function App() {
   return (

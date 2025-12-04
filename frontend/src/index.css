@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 @import "tailwindcss";
-@plugin "daisyui";
+
+@plugin "daisyui" {
+  themes: nord --default, sunset --prefersdark;
+}
+
+;
 /* Se eliminaron las directivas obsoletas (@import "tailwindcss"; @plugin "daisyui";) */
 
 /* Base resets and sensible defaults; keep minimal since Tailwind handles most styling */
