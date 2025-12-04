@@ -2,6 +2,7 @@ import "./App.css";
 // IMPORTACIONES CORREGIDAS
 import MobileView from "./components/MobileView";
 import DesktopView from "./components/DesktopView";
+import Usuarios from "./components/Usuarios";
 
 function App() {
   return (
@@ -14,6 +15,9 @@ function App() {
       {/* VISTA ESCRITORIO: Oculto por defecto (hidden), visible en escritorio (md:block) */}
       <div className="hidden md:block">
         <DesktopView />
+      </div>
+      <div>
+        <Usuarios/>
       </div>
     </>
   );
