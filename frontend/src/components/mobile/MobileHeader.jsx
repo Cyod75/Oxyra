@@ -8,9 +8,9 @@ export default function MobileHeader() {
     const updateLogo = () => {
       const theme = document.documentElement.getAttribute("data-theme");
       if (theme === "nord") {
-        setLogoSrc("./src/assets/image/logo-black.png"); // Tema oscuro → logo blanco
+        setLogoSrc("./public/image/logo-black.png"); // Tema oscuro → logo blanco
       } else {
-        setLogoSrc("./src/assets/image/logo-white.png"); // Tema claro → logo negro
+        setLogoSrc("./public/image/logo-white.png"); // Tema claro → logo negro
       }
     };
 
