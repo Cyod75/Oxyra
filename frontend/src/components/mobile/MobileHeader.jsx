@@ -1,16 +1,19 @@
-// src/components/MobileHeader.jsx
 import { useState, useEffect } from "react";
+// Importamos las imágenes para que Vite las procese en el build
+import logoBlack from "../../assets/image/logo-black.png";
+import logoWhite from "../../assets/image/logo-white.png";
 
 export default function MobileHeader() {
-  const [logoSrc, setLogoSrc] = useState("../assets/image/logo-black.png");
+  // Usamos la variable importada en lugar del string
+  const [logoSrc, setLogoSrc] = useState(logoBlack);
 
   useEffect(() => {
     const updateLogo = () => {
       const theme = document.documentElement.getAttribute("data-theme");
       if (theme === "nord") {
-        setLogoSrc("./public/image/logo-black.png"); // Tema oscuro → logo blanco
+        setLogoSrc(logoBlack); // Usamos la variable importada
       } else {
-        setLogoSrc("./public/image/logo-white.png"); // Tema claro → logo negro
+        setLogoSrc(logoWhite); // Usamos la variable importada
       }
     };
 
