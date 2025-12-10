@@ -1,10 +1,20 @@
 import { useEffect, useState } from "react";
 
 export default function ThemeController() {
-  // Lógica del tema
+  // Lógica del tema corregida
   const [theme, setTheme] = useState(() => {
     try {
-      return localStorage.getItem("theme") || "nord";
+      // 1. Miramos si el usuario ya guardó una preferencia manualmente
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) return savedTheme;
+
+      // 2. Si no hay nada guardado, comprobamos la preferencia del sistema operativo
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return "sunset"; // Si el sistema es oscuro, iniciamos en sunset
+      }
+
+      // 3. Si no, por defecto nord (claro)
+      return "nord";
     } catch {
       return "nord";
     }
@@ -22,7 +32,6 @@ export default function ThemeController() {
   };
 
   return (
-    // Eliminamos el <main> y el texto <p>. Solo dejamos el interruptor.
     <label className="swap swap-rotate text-base-content">
       {/* checkbox controlado */}
       <input
@@ -34,7 +43,7 @@ export default function ThemeController() {
 
       {/* ÍCONO SOL (Modo Claro) */}
       <svg
-        className="swap-off h-8 w-8 fill-current" // Reduje un poco el tamaño a h-8 para que encaje mejor
+        className="swap-off h-8 w-8 fill-current"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
       >
