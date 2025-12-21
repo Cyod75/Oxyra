@@ -1,38 +1,43 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 
-// Layouts y Vistas
+// --- Layouts / Vistas ---
 import MobileView from "./views/MobileView";
 import DesktopView from "./views/DesktopView";
 
-// Páginas Móviles
-import MobileTraining from "./components/mobile/pages/MobileTraining";
-import MobileProducts from "./components/mobile/pages/MobileProducts";
-import MobileStatistics from "./components/mobile/pages/MobileStatistics";
-import MobileProfile from "./components/mobile/pages/MobileProfile";
-import MobileSettings from "./components/mobile/pages/MobileSettings";
+// --- Páginas ---
+// CORRECCIÓN: Según tu captura de pantalla, las páginas están dentro de la carpeta "mobile"
+import MobileTraining from "./pages/mobile/MobileTraining";
+import MobileProducts from "./pages/mobile/MobileProducts";
+import MobileStatistics from "./pages/mobile/MobileStatistics";
+import MobileProfile from "./pages/mobile/MobileProfile";
+import MobileSettings from "./pages/mobile/MobileSettings";
 
 function App() {
   return (
     <>
-      {/* VISTA MÓVIL: Contiene el sistema de rutas */}
-      <div className="md:hidden h-screen flex flex-col">
+      {/* --- VISTA MÓVIL --- */}
+      {/* bg-base-100 y text-base-content aseguran que el fondo reaccione al cambio de tema */}
+      <div className="md:hidden h-screen flex flex-col bg-base-100 text-base-content transition-colors duration-200">
         <Routes>
-          {/* MobileView es el Layout (Header + Footer) */}
+          {/* Ruta Layout: MobileView 
+              Contiene el Header y el Footer fijos.
+          */}
           <Route path="/" element={<MobileView />}>
-            {/* Index: Lo que se ve al entrar a "/" */}
             <Route index element={<MobileTraining />} />
-            
-            {/* Rutas internas */}
             <Route path="products" element={<MobileProducts />} />
             <Route path="stats" element={<MobileStatistics />} />
             <Route path="profile" element={<MobileProfile />} />
           </Route>
+
+          {/* Ruta Independiente: Settings
+              Está fuera de MobileView para no mostrar el footer/header de navegación principal
+          */}
           <Route path="settings" element={<MobileSettings />} />
         </Routes>
       </div>
 
-      {/* VISTA ESCRITORIO: Se mantiene igual por ahora */}
+      {/* --- VISTA ESCRITORIO --- */}
       <div className="hidden md:block">
         <DesktopView />
       </div>

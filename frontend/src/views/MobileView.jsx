@@ -1,8 +1,8 @@
 import React from "react";
 import { Outlet } from "react-router-dom"; // Importante
 import ThemeController from "../components/shared/ThemeController";
-import MobileHeader from "../components/mobile/MobileHeader";
-import MobileFooter from "../components/mobile/MobileFooter";
+import MobileHeader from "../components/layouts/MobileHeader";
+import MobileFooter from "../components/layouts/MobileFooter";
 
 export default function MobileView() {
   return (
