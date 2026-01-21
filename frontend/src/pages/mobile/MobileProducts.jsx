@@ -7,7 +7,7 @@ export default function MobileProducts() {
       <div className="grid grid-cols-2 gap-3">
         {/* Productos placeholder */}
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="card bg-base-100 shadow-md border border-base-200">
+          <div key={i} className="card bg-base-200 shadow-md border border-base-200">
             <figure className="bg-base-300 h-24 flex items-center justify-center">
               <span className="opacity-40">IMG</span>
             </figure>

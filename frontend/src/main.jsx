@@ -3,18 +3,17 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
-
-// IMPORTANTE: Importamos el contexto para que funcione el cambio de tema en toda la app
 import { ThemeProvider } from './context/ThemeContext'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      {/* El Provider debe estar dentro del Router o envolviéndolo, 
-          pero siempre envolviendo a App para que useTheme funcione dentro. */}
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </BrowserRouter>
+    <GoogleOAuthProvider clientId="347793586128-k66ji06lfekp2cc9ipd2g7tsvnht739q.apps.googleusercontent.com">
+      <BrowserRouter>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   </StrictMode>,
 )

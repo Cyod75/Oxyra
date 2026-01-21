@@ -1,12 +1,18 @@
-import "./App.css";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-// --- Layouts / Vistas ---
+// --- Layouts ---
 import MobileView from "./views/MobileView";
 import DesktopView from "./views/DesktopView";
 
-// --- Páginas ---
-// CORRECCIÓN: Según tu captura de pantalla, las páginas están dentro de la carpeta "mobile"
+// --- Components Shared ---
+import ProtectedRoute from "./components/shared/ProtectedRoute";
+
+// --- Auth Pages (NUEVAS) ---
+import Welcome from "./pages/auth/Welcome";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+
+// --- Mobile Pages ---
 import MobileTraining from "./pages/mobile/MobileTraining";
 import MobileProducts from "./pages/mobile/MobileProducts";
 import MobileStatistics from "./pages/mobile/MobileStatistics";
@@ -16,28 +22,36 @@ import MobileSettings from "./pages/mobile/MobileSettings";
 function App() {
   return (
     <>
-      {/* --- VISTA MÓVIL --- */}
-      {/* bg-base-100 y text-base-content aseguran que el fondo reaccione al cambio de tema */}
       <div className="md:hidden h-screen flex flex-col bg-base-100 text-base-content transition-colors duration-200">
         <Routes>
-          {/* Ruta Layout: MobileView 
-              Contiene el Header y el Footer fijos.
-          */}
-          <Route path="/" element={<MobileView />}>
-            <Route index element={<MobileTraining />} />
-            <Route path="products" element={<MobileProducts />} />
-            <Route path="stats" element={<MobileStatistics />} />
-            <Route path="profile" element={<MobileProfile />} />
+          
+          {/* --- RUTAS PÚBLICAS --- */}
+          {/* Si ya está logueado, no debería ver el Welcome. 
+              (Opcional: podrías crear un 'PublicRoute' que redirija al home si ya tiene token) */}
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* --- RUTAS PROTEGIDAS --- */}
+          <Route element={<ProtectedRoute />}>
+            
+            <Route path="/" element={<MobileView />}>
+              <Route index element={<MobileTraining />} />
+              <Route path="products" element={<MobileProducts />} />
+              <Route path="stats" element={<MobileStatistics />} />
+              <Route path="profile" element={<MobileProfile />} />
+            </Route>
+
+            <Route path="settings" element={<MobileSettings />} />
+
           </Route>
 
-          {/* Ruta Independiente: Settings
-              Está fuera de MobileView para no mostrar el footer/header de navegación principal
-          */}
-          <Route path="settings" element={<MobileSettings />} />
+          {/* Redirección por defecto */}
+          <Route path="*" element={<Navigate to="/" />} />
+
         </Routes>
       </div>
 
-      {/* --- VISTA ESCRITORIO --- */}
       <div className="hidden md:block">
         <DesktopView />
       </div>
