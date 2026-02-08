@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { IconBackArrow, IconLock } from "../../components/icons/Icons";
+import { API_URL } from '../../config/api';
 
 export default function Login() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
-  // Ajustado: backend espera 'email', no 'correo'
   const [formData, setFormData] = useState({
     email: "", 
     password: "",
@@ -24,8 +24,7 @@ export default function Login() {
     setError("");
 
     try {
-      // Ruta actualizada a /api/auth/login
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -37,8 +36,6 @@ export default function Login() {
         throw new Error(data.error || "Error al iniciar sesión");
       }
 
-      // Guardamos token. El backend ahora devuelve { token, user: {...} }
-      // Podrías guardar data.user en un contexto global si quisieras.
       localStorage.setItem("authToken", data.token);
       navigate("/"); 
 
@@ -90,7 +87,8 @@ export default function Login() {
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5 text-zinc-600 group-focus-within:text-white transition-colors duration-300"><path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" /><path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" /></svg>
               <input 
                 type="email" 
-                name="email" // Cambiado name="correo" a name="email"
+                name="email"
+                autoComplete="email"
                 className="bg-transparent border-none text-white w-full ml-3 focus:outline-none placeholder-zinc-600 font-medium h-full"
                 placeholder="ejemplo@oxyra.com" 
                 required
@@ -107,10 +105,16 @@ export default function Login() {
             </div>
             
             <div className="group bg-zinc-900/50 border border-zinc-800 focus-within:border-zinc-500 focus-within:bg-zinc-900 transition-all duration-300 rounded-2xl flex items-center px-4 py-3.5">
-              <IconLock className="w-5 h-5 text-zinc-600 group-focus-within:text-white transition-colors duration-300" />
+              
+              {/* CORRECCIÓN: Envolvemos el icono en un div para controlar el color */}
+              <div className="text-zinc-600 group-focus-within:text-white transition-colors duration-300">
+                  <IconLock className="w-5 h-5" />
+              </div>
+
               <input 
                 type="password" 
                 name="password"
+                autoComplete="current-password"
                 className="bg-transparent border-none text-white w-full ml-3 focus:outline-none placeholder-zinc-600 font-medium h-full"
                 placeholder="••••••••" 
                 required

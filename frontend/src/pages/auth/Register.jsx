@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { IconBackArrow, IconUser, IconLock } from "../../components/icons/Icons";
-
+import { API_URL } from '../../config/api';
 
 const FormInput = ({ label, icon, type, name, placeholder, value, onChange, extraProps = {} }) => (
     <div className="space-y-1.5">
@@ -49,7 +49,7 @@ export default function Register() {
 
     try {
       // Ruta actualizada a /api/auth/register
-      const response = await fetch('http://localhost:3001/api/auth/register', {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -122,6 +122,7 @@ export default function Register() {
                 placeholder="david_g"
                 value={formData.username}
                 onChange={handleChange}
+                extraProps={{ autoComplete: "username" }}
             />
 
             <FormInput 
@@ -134,6 +135,7 @@ export default function Register() {
                 placeholder="hola@oxyra.com"
                 value={formData.email}
                 onChange={handleChange}
+                extraProps={{ autoComplete: "email" }}
             />
 
             <FormInput 
@@ -144,7 +146,7 @@ export default function Register() {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                extraProps={{ minLength: 6 }}
+                extraProps={{ minLength: 6, autoComplete:"new-password" }}
             />
 
             <button 

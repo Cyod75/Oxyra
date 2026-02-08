@@ -1,182 +1,152 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-// IMPORTAMOS TUS ICONOS LOCALES (Asegúrate de haber añadido IconCamera y IconUserPlus en Icons.jsx)
-import { IconSettings, IconUserPlus, IconCamera } from "../../components/icons/Icons";
+import { API_URL } from '../../config/api';
+// ICONOS
+import { IconSettings, IconUserPlus } from "../../components/icons/Icons";
 
 // SHADCN UI
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
+// COMPONENTE REUTILIZABLE
+import ProfileSheet from "../../components/settings/sheets/ProfileSheet";
+// IMPORTAR EL LOADER
+import ModernLoader from "../../components/shared/ModernLoader";
 
 const DEFAULT_AVATAR = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
 
 export default function MobileProfile() {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null); 
-  
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  
+  // Estado para controlar el Popup de edición
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  // Estado principal del usuario
+  // Estado del usuario
   const [user, setUser] = useState({
     nombre: "Cargando...",
     username: "...",
     biografia: "",
     foto_perfil: DEFAULT_AVATAR,
+    peso: "",
+    altura: "",
+    genero: "M",
     stats: { entrenos: 0, seguidores: 0, seguidos: 0 },
     es_pro: false 
   });
 
-  // Estado temporal solo para el formulario de edición
-  const [editForm, setEditForm] = useState({
-    nombre: "",
-    biografia: "",
-    file: null 
-  });
-  
-  const [previewUrl, setPreviewUrl] = useState(null);
-
   // 1. CARGAR DATOS
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem("authToken");
-      if (!token) return navigate("/welcome");
-
-      try {
-        const response = await fetch("http://localhost:3001/api/users/me", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (!response.ok) throw new Error("Error al cargar perfil");
-        
-        const data = await response.json();
-
-        setUser({
-            nombre: data.nombre_completo || "Usuario Oxyra",
-            username: data.username,
-            biografia: data.biografia || "",
-            foto_perfil: data.foto_perfil || DEFAULT_AVATAR, 
-            stats: { 
-                entrenos: data.stats?.length || 0, 
-                seguidores: 0, 
-                seguidos: 0 
-            },
-            es_pro: data.es_pro === 1
-        });
-
-        // Inicializamos el form
-        setEditForm({
-            nombre: data.nombre_completo || "",
-            biografia: data.biografia || "",
-            file: null
-        });
-
-      } catch (error) {
-        console.error("Error profile:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfile();
   }, [navigate]);
 
-  // 2. PREVIEW FOTO (Solo ocurre dentro del modal)
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        setEditForm(prev => ({ ...prev, file: file }));
-        setPreviewUrl(URL.createObjectURL(file));
+  const fetchProfile = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return navigate("/welcome");
+
+    try {
+      const response = await fetch(`${API_URL}/api/users/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) throw new Error("Error al cargar perfil");
+      
+      const data = await response.json();
+
+      setUser({
+          nombre: data.nombre_completo || "Usuario",
+          username: data.username,
+          biografia: data.biografia || "",
+          foto_perfil: data.foto_perfil || DEFAULT_AVATAR,
+          
+          // IMPORTANTE: Mapeo exacto con los nombres que devolvemos ahora en el backend
+          peso: data.peso_kg || "",
+          altura: data.estatura_cm || "",
+          genero: data.genero || "M",
+          
+          stats: { 
+              entrenos: data.stats?.entrenos || 0, 
+              seguidores: data.stats?.seguidores || 0, 
+              seguidos: data.stats?.seguidos || 0 
+          },
+          es_pro: data.es_pro === 1
+      });
+
+      setLoading(false);
+
+    } catch (error) {
+      console.error(error);
+      setError(true);
     }
   };
 
-  // 3. GUARDAR (Solo aquí se hacen cambios persistentes)
-  const handleSaveChanges = async () => {
-    const token = localStorage.getItem("authToken");
-    const formData = new FormData();
-
-    formData.append("nombre_completo", editForm.nombre);
-    formData.append("biografia", editForm.biografia);
+  const handleShareProfile = async () => {
+    const shareUrl = `${window.location.origin}/profile/${user.username}`;
     
-    if (editForm.file) {
-        formData.append("foto", editForm.file); 
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: `Perfil de ${user.nombre}`,
+                text: '¡Entrena conmigo en Oxyra!',
+                url: shareUrl
+            });
+            return; 
+        } catch (err) {
+            console.log("Compartir cancelado");
+        }
     }
 
     try {
-        const res = await fetch("http://localhost:3001/api/users/update", {
-            method: "PUT",
-            headers: { Authorization: `Bearer ${token}` },
-            body: formData 
-        });
-
-        if (res.ok) {
-            const data = await res.json();
-            // Actualizamos la vista principal solo si el backend confirma éxito
-            setUser(prev => ({
-                ...prev,
-                nombre: editForm.nombre,
-                biografia: editForm.biografia,
-                foto_perfil: data.foto_perfil || prev.foto_perfil 
-            }));
-            // Limpiamos preview
-            setPreviewUrl(null);
-            alert("Perfil actualizado correctamente");
-            // Nota: El Sheet se cerrará automáticamente si usas el componente standard o puedes controlar el estado open
-        }
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Enlace copiado al portapapeles"); 
     } catch (err) {
-        console.error("Error updating:", err);
-        alert("Error al actualizar perfil");
+        alert("No se pudo copiar el enlace automáticamente");
     }
   };
 
-  // Resetear el formulario al abrir (opcional, para descartar cambios no guardados previos)
-  const handleOpenSheet = () => {
-      setEditForm({
-          nombre: user.nombre,
-          biografia: user.biografia,
-          file: null
-      });
-      setPreviewUrl(null);
-  };
-
-  if (loading) return <div className="flex h-screen items-center justify-center">Cargando perfil...</div>;
+  // 4. BLOQUEO DE SEGURIDAD (SOLUCIÓN LOADER)
+  if (loading || error) {
+    return (
+        <div className="min-h-screen w-full bg-background flex items-center justify-center overflow-hidden pt-[108px]">
+            <ModernLoader text={error ? "ERROR DE CONEXIÓN" : "PREPARANDO PERFIL..."} />
+        </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background pb-24 font-sans">
+    <div className="min-h-screen bg-background pb-24 font-sans text-foreground animate-in fade-in duration-500">
       
-      {/* 1. TOP BAR (NO STICKY) - Se integra en el flujo normal */}
-      <div className="flex items-center justify-between px-4 pt-6 pb-2 bg-background">
-         <h1 className="text-xl font-bold tracking-tight text-foreground">{user.username}</h1>
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-4 pt-6 pb-2">
+         <h1 className="text-xl font-bold tracking-tight">@{user.username}</h1>
          <div className="flex items-center gap-5">
-            <IconUserPlus className="text-foreground" />
-            {/* Reutilizamos tu IconSettings existente */}
-            <div onClick={() => navigate("/settings")} className="cursor-pointer">
+            <IconUserPlus className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors" />
+            <div onClick={() => navigate("/settings")} className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
                 <IconSettings />
             </div>
          </div>
       </div>
 
-      {/* 2. SECCIÓN INFO PERFIL */}
+      {/* INFO PERFIL */}
       <div className="px-4 mt-4 mb-6">
         <div className="flex items-center gap-6">
-           
-           {/* AVATAR (Izquierda) - SIN ONCLICK (Solo visual) */}
            <Avatar className="h-24 w-24 border border-border shadow-sm">
               <AvatarImage src={user.foto_perfil} className="object-cover" />
               <AvatarFallback>OX</AvatarFallback>
            </Avatar>
 
-           {/* INFO (Derecha) */}
            <div className="flex-1 flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                 <span className="font-bold text-lg leading-none text-foreground">{user.nombre}</span>
+              <div className="flex flex-col">
+                 <span className="font-bold text-lg leading-none">{user.nombre}</span>
+                 {user.es_pro && (
+                    <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 uppercase tracking-widest mt-1">
+                        Pro Athlete
+                    </span>
+                 )}
               </div>
 
-              {/* Stats: Etiqueta arriba, Número abajo */}
               <div className="flex justify-between pr-4">
                  <StatItem label="Entrenos" num={user.stats.entrenos} />
                  <StatItem label="Seguidores" num={user.stats.seguidores} />
@@ -185,79 +155,35 @@ export default function MobileProfile() {
            </div>
         </div>
 
-        {/* BIOGRAFÍA */}
         <div className="mt-4">
            <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-             {user.biografia || "Sin biografía."}
+             {user.biografia || "Añade una descripción sobre ti."}
            </p>
         </div>
       </div>
 
-      {/* 3. BOTONES DE ACCIÓN */}
+      {/* BOTONES ACCIÓN */}
       <div className="px-4 mb-8">
         <div className="flex gap-3">
-           {/* SHEET PARA EDITAR */}
-           <Sheet onOpenChange={(open) => open && handleOpenSheet()}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="flex-1 h-9 rounded-lg font-semibold bg-secondary/50 border-0 text-foreground hover:bg-secondary">
-                  Editar Perfil
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[90%] rounded-t-2xl px-5">
-                 <SheetHeader className="mb-6 mt-4">
-                    <SheetTitle>Editar Perfil</SheetTitle>
-                    <SheetDescription>Actualiza tu información pública.</SheetDescription>
-                 </SheetHeader>
-                 
-                 <div className="space-y-6">
-                    {/* ZONA DE EDICIÓN DE FOTO (Solo aquí se puede cambiar) */}
-                    <div className="flex flex-col items-center gap-3">
-                        <div 
-                            className="relative group cursor-pointer" 
-                            onClick={() => fileInputRef.current.click()}
-                        >
-                            <Avatar className="h-24 w-24 border-2 border-dashed border-muted group-hover:border-primary transition-colors">
-                               {/* Mostramos preview si existe, sino la actual */}
-                               <AvatarImage src={previewUrl || user.foto_perfil} className="object-cover" />
-                               <AvatarFallback>IMG</AvatarFallback>
-                            </Avatar>
-                            {/* Overlay icon */}
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                <IconCamera className="text-white" />
-                            </div>
-                        </div>
-                        <span className="text-xs text-muted-foreground">Toca para cambiar la foto</span>
-                        
-                        {/* Input oculto */}
-                        <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            className="hidden" 
-                            accept="image/*" 
-                            onChange={handleFileChange} 
-                        />
-                    </div>
-
-                    <div className="space-y-1">
-                       <Label>Nombre</Label>
-                       <Input value={editForm.nombre} onChange={(e) => setEditForm({...editForm, nombre: e.target.value})} />
-                    </div>
-                    <div className="space-y-1">
-                       <Label>Biografía</Label>
-                       <Textarea value={editForm.biografia} onChange={(e) => setEditForm({...editForm, biografia: e.target.value})} />
-                    </div>
-                    <Button className="w-full" onClick={handleSaveChanges}>Guardar Cambios</Button>
-                 </div>
-              </SheetContent>
-           </Sheet>
+           <Button 
+             variant="outline" 
+             onClick={() => setIsSheetOpen(true)}
+             className="flex-1 h-9 rounded-lg font-semibold bg-secondary/50 border-0 text-foreground hover:bg-secondary transition-colors"
+           >
+             Editar Perfil
+           </Button>
            
-           <Button variant="outline" className="flex-1 h-9 rounded-lg font-semibold bg-secondary/50 border-0 text-foreground hover:bg-secondary">
+           <Button 
+             variant="outline" 
+             onClick={handleShareProfile}
+             className="flex-1 h-9 rounded-lg font-semibold bg-secondary/50 border-0 text-foreground hover:bg-secondary transition-colors"
+           >
               Compartir
            </Button>
         </div>
       </div>
 
-      {/* 4. GRÁFICA DE CONSISTENCIA */}
+      {/* GRÁFICA */}
       <div className="px-4">
         <div className="flex items-center justify-between mb-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Consistencia</h3>
@@ -268,14 +194,22 @@ export default function MobileProfile() {
               {[20, 45, 30, 80, 55, 90, 40].map((val, i) => (
                  <div key={i} className="w-full relative group">
                     <div 
-                      className="w-full bg-primary rounded-t-sm transition-all hover:bg-primary/80" 
-                      style={{ height: `${val}%`, opacity: val > 0 ? 1 : 0.1 }} 
+                      className={`w-full rounded-t-sm transition-all ${val > 0 ? 'bg-primary hover:bg-primary/80' : 'bg-secondary'}`} 
+                      style={{ height: `${val || 5}%`, opacity: val > 0 ? 1 : 0.3 }} 
                     />
                  </div>
               ))}
            </CardContent>
         </Card>
       </div>
+
+      {/* POPUP DE EDICIÓN */}
+      <ProfileSheet 
+        open={isSheetOpen} 
+        onOpenChange={setIsSheetOpen} 
+        onUpdate={fetchProfile}
+        userData={user} 
+      />
 
     </div>
   );

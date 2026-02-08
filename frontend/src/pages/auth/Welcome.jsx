@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
-import logoWhite from "../../assets/images/logo-white.png";
+import logoWhite from "../../assets/images/oxyra-white.png";
+import { API_URL } from "../../config/api";
 
 // Usamos imágenes oscuras y de alta calidad para el fondo.
 // El texto es más directo, como en la referencia.
@@ -31,42 +32,45 @@ export default function Welcome() {
   const navigate = useNavigate();
 
   const loginWithGoogle = useGoogleLogin({
-  onSuccess: async (tokenResponse) => {
-    try {
-      // 1. Usamos el token de Google para obtener los datos del usuario (email, nombre, etc.)
-      const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-        headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-      });
-      const userInfo = await res.json();
+    onSuccess: async (tokenResponse) => {
+      try {
+        // 1. Usamos el token de Google para obtener los datos del usuario (email, nombre, etc.)
+        const res = await fetch(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+          },
+        );
+        const userInfo = await res.json();
 
-      // 2. Enviamos estos datos a NUESTRO backend
-      const backendRes = await fetch("http://localhost:3001/api/auth/google-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: userInfo.email,
-          name: userInfo.name,
-          picture: userInfo.picture,
-          sub: userInfo.sub // Este es el ID único de Google
-        }),
-      });
+        // 2. Enviamos estos datos a NUESTRO backend
+        const backendRes = await fetch(`${API_URL}/api/auth/google-login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: userInfo.email,
+            name: userInfo.name,
+            picture: userInfo.picture,
+            sub: userInfo.sub, // Este es el ID único de Google
+          }),
+        });
 
-      const data = await backendRes.json();
+        const data = await backendRes.json();
 
-      if (backendRes.ok && data.token) {
-        // 3. AHORA SÍ: Guardamos el token que generó nuestro servidor
-        localStorage.setItem("authToken", data.token);
-        navigate("/");
-      } else {
-        console.error("Error en el login del servidor:", data.error);
-        alert("El servidor no pudo validar la cuenta de Google.");
+        if (backendRes.ok && data.token) {
+          // 3. AHORA SÍ: Guardamos el token que generó nuestro servidor
+          localStorage.setItem("authToken", data.token);
+          navigate("/");
+        } else {
+          console.error("Error en el login del servidor:", data.error);
+          alert("El servidor no pudo validar la cuenta de Google.");
+        }
+      } catch (error) {
+        console.error("Error en el proceso de Google:", error);
       }
-    } catch (error) {
-      console.error("Error en el proceso de Google:", error);
-    }
-  },
-  onError: () => console.log("Error en el login con Google"),
-});
+    },
+    onError: () => console.log("Error en el login con Google"),
+  });
 
   // Autoplay del carrusel (opcional)
   useEffect(() => {
