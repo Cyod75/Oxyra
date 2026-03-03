@@ -17,6 +17,7 @@ import SecuritySheet from "../../components/settings/sheets/SecuritySheet";
 import ProfileSheet from "../../components/settings/sheets/ProfileSheet";
 import SubscriptionSheet from "../../components/settings/sheets/SubscriptionSheet";
 import NotificationSheet from "../../components/settings/sheets/NotificationSheet";
+import DeleteAccountSheet from "../../components/settings/sheets/DeleteAccountSheet";
 
 // Hooks
 import { useSubscription } from "../../hooks/useSubscription";
@@ -27,8 +28,10 @@ import BackButton from "../../components/shared/BackButton";
 import {
   IconBackArrow, IconUser, IconLock, IconLogout,
   IconPalette, IconWeight, IconTrash, IconBell,
-  IconSparkles
+  IconSparkles, IconEyeOff
 } from "../../components/icons/Icons";
+
+import { API_URL } from '../../config/api';
 
 // Icono de carga simple (Spinner)
 const Spinner = () => (
@@ -50,6 +53,50 @@ export default function MobileSettings() {
   const [showSecurity, setShowSecurity] = useState(false); 
   const [showSubscription, setShowSubscription] = useState(false);
   const [showNotificationConfirm, setShowNotificationConfirm] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+
+  // PRIVACIDAD
+  const [esPrivada, setEsPrivada] = useState(false);
+
+  React.useEffect(() => {
+      const fetchPrivacy = async () => {
+          const token = localStorage.getItem("authToken");
+          try {
+              // Reusing /me endpoint to get es_privada
+              const res = await fetch(`${API_URL}/api/users/me`, {
+                  headers: { Authorization: `Bearer ${token}` }
+              });
+              if(res.ok) {
+                  const data = await res.json();
+                  setEsPrivada(data.es_privada === 1);
+              }
+          } catch(e) { console.error(e); }
+      };
+      fetchPrivacy();
+  }, []);
+
+  const handleTogglePrivate = async (val) => {
+      // Optimistic update
+      setEsPrivada(val);
+      const token = localStorage.getItem("authToken");
+      try {
+          const formData = new FormData();
+          formData.append("es_privada", val); // Backend expects form data for updateProfile usually, or JSON? 
+          // userController.updateProfile uses req.body and req.file. It seems it expects FormData because of upload.single('foto').
+          // But bodyParser might handle JSON if no file? 
+          // Let's use JSON if possible, but the route uses upload.single so it might expect multipart/form-data.
+          // Safety: Use FormData.
+          
+          await fetch(`${API_URL}/api/users/update`, {
+              method: "PUT",
+              headers: { Authorization: `Bearer ${token}` }, // No content-type for FormData
+              body: formData
+          });
+      } catch(e) {
+          console.error(e);
+          setEsPrivada(!val); // Revert on error
+      }
+  };
 
   // Lógica del Click en Notificaciones (CORREGIDA)
   const handleNotificationClick = () => {
@@ -92,6 +139,21 @@ export default function MobileSettings() {
               onClick={() => setShowSubscription(true)}
             />
             <SettingsRow icon={<IconUser />} label="Datos Personales" sub="Físico, Nombre, Foto" onClick={() => setShowProfile(true)} />
+            
+            {/* CUENTA PRIVADA */}
+            <SettingsRow 
+                icon={<IconEyeOff />} 
+                label="Cuenta Privada" 
+                sub="Solo tú y tus seguidores verán tu perfil"
+                iconClass={esPrivada ? "bg-indigo-500 text-white" : "bg-indigo-500/10 text-indigo-500"}
+                right={
+                    <Switch 
+                        checked={esPrivada} 
+                        onCheckedChange={handleTogglePrivate}
+                    />
+                } 
+            />
+
             <SettingsRow icon={<IconLock />} label="Seguridad" sub="Cambiar contraseña" onClick={() => setShowSecurity(true)} />
           </SettingsSection>
 
@@ -146,7 +208,7 @@ export default function MobileSettings() {
             />
              <SettingsRow 
               icon={<IconTrash />} label="Eliminar Cuenta" isDestructive 
-              onClick={() => alert("Pendiente de implementar")} 
+              onClick={() => setShowDeleteAccount(true)} 
             />
           </SettingsSection>
 
@@ -160,6 +222,7 @@ export default function MobileSettings() {
       {/* SHEETS */}
       <SecuritySheet open={showSecurity} onOpenChange={setShowSecurity} />
       <ProfileSheet open={showProfile} onOpenChange={setShowProfile} />
+      <DeleteAccountSheet open={showDeleteAccount} onOpenChange={setShowDeleteAccount} />
       <SubscriptionSheet 
         open={showSubscription} 
         onOpenChange={setShowSubscription}

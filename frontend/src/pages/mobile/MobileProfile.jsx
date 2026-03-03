@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from '../../config/api';
 // ICONOS
-import { IconSettings, IconUserPlus } from "../../components/icons/Icons";
+import { IconSettings, IconHeart } from "../../components/icons/Icons";
 
 // SHADCN UI
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 // COMPONENTE REUTILIZABLE
 import ProfileSheet from "../../components/settings/sheets/ProfileSheet";
+import FollowRequestsSheet from "../../components/settings/sheets/FollowRequestsSheet";
 // IMPORTAR EL LOADER
 import ModernLoader from "../../components/shared/ModernLoader";
 
@@ -23,6 +24,7 @@ export default function MobileProfile() {
   
   // Estado para controlar el Popup de edición
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [showRequests, setShowRequests] = useState(false); // NUEVO ESTADO
 
   // Estado del usuario
   const [user, setUser] = useState({
@@ -122,7 +124,10 @@ export default function MobileProfile() {
       <div className="flex items-center justify-between px-4 pt-6 pb-2">
          <h1 className="text-xl font-bold tracking-tight">@{user.username}</h1>
          <div className="flex items-center gap-5">
-            <IconUserPlus className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors" />
+            <div onClick={() => setShowRequests(true)} className="relative cursor-pointer text-muted-foreground hover:text-blue-500 transition-colors duration-300">
+                <IconHeart />
+                {/* Indicador de pendientes podría ir aquí si tuviéramos el count disponible en user object */}
+            </div>
             <div onClick={() => navigate("/settings")} className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
                 <IconSettings />
             </div>
@@ -149,9 +154,13 @@ export default function MobileProfile() {
 
               <div className="flex justify-between pr-4">
                  <StatItem label="Entrenos" num={user.stats.entrenos} />
-                 <StatItem label="Seguidores" num={user.stats.seguidores} />
-                 <StatItem label="Seguidos" num={user.stats.seguidos} />
-              </div>
+                 <div onClick={() => navigate(`/profile/${user.username}/followers`)} className="cursor-pointer hover:opacity-80 active:scale-95 transition-all">
+                   <StatItem label="Seguidores" num={user.stats.seguidores} />
+                 </div>
+                 <div onClick={() => navigate(`/profile/${user.username}/following`)} className="cursor-pointer hover:opacity-80 active:scale-95 transition-all">
+                   <StatItem label="Seguidos" num={user.stats.seguidos} />
+                 </div>
+               </div>
            </div>
         </div>
 
@@ -209,6 +218,13 @@ export default function MobileProfile() {
         onOpenChange={setIsSheetOpen} 
         onUpdate={fetchProfile}
         userData={user} 
+      />
+
+      {/* POPUP DE SOLICITUDES */}
+      <FollowRequestsSheet 
+        open={showRequests} 
+        onOpenChange={setShowRequests}
+        onUpdate={fetchProfile}
       />
 
     </div>

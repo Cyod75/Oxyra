@@ -10,7 +10,7 @@ exports.getProfile = async (req, res) => {
         // 1. Datos básicos del usuario
         // CORRECCIÓN: Añadidos peso_kg, estatura_cm y genero a la selección
         const [user] = await db.query(
-            "SELECT idUsuario, username, nombre_completo, foto_perfil, biografia, rango_global, es_pro, peso_kg, estatura_cm, genero FROM usuarios WHERE idUsuario = ?", 
+            "SELECT idUsuario, username, nombre_completo, foto_perfil, biografia, rango_global, es_pro, es_privada, peso_kg, estatura_cm, genero FROM usuarios WHERE idUsuario = ?", 
             [userId]
         );
         
@@ -44,7 +44,7 @@ exports.getProfile = async (req, res) => {
 
 // ACTUALIZAR PERFIL
 exports.updateProfile = async (req, res) => {
-    const { nombre_completo, biografia, peso_kg, estatura_cm, genero } = req.body;
+    const { nombre_completo, biografia, peso_kg, estatura_cm, genero, es_privada } = req.body;
     let foto_perfil_url;
 
     try {
@@ -55,11 +55,14 @@ exports.updateProfile = async (req, res) => {
             foto_perfil_url = currentUser[0].foto_perfil;
         }
 
+        // Convertir es_privada a booleano (0 o 1) si viene como string
+        const isPrivate = es_privada === 'true' || es_privada === true || es_privada === 1 ? 1 : 0;
+
         await db.query(
             `UPDATE usuarios 
-             SET nombre_completo = ?, biografia = ?, foto_perfil = ?, peso_kg = ?, estatura_cm = ?, genero = ? 
+             SET nombre_completo = ?, biografia = ?, foto_perfil = ?, peso_kg = ?, estatura_cm = ?, genero = ?, es_privada = ? 
              WHERE idUsuario = ?`,
-            [nombre_completo, biografia, foto_perfil_url, peso_kg || null, estatura_cm || null, genero || null, req.user.id]
+            [nombre_completo, biografia, foto_perfil_url, peso_kg || null, estatura_cm || null, genero || null, isPrivate, req.user.id]
         );
 
         res.json({ message: "Perfil actualizado", foto_perfil: foto_perfil_url });
@@ -75,7 +78,7 @@ exports.searchUsers = async (req, res) => {
     const myId = req.user.id;
 
     try {
-        // SQL: Busca usuarios por nombre Y comprueba en la tabla seguidores si existe relación
+        // SQL: Busca usuarios por nombre Y comprueba estado de seguimiento
         const sql = `
             SELECT 
                 u.idUsuario, 
@@ -83,18 +86,20 @@ exports.searchUsers = async (req, res) => {
                 u.nombre_completo, 
                 u.foto_perfil, 
                 u.rango_global,
-                (SELECT COUNT(*) FROM seguidores s WHERE s.seguidor_id = ? AND s.seguido_id = u.idUsuario) as lo_sigo
+                u.es_privada,
+                s.estado as follow_status
             FROM usuarios u
+            LEFT JOIN seguidores s ON s.seguidor_id = ? AND s.seguido_id = u.idUsuario
             WHERE u.username LIKE ? AND u.idUsuario != ?
             LIMIT 20
         `;
 
         const [users] = await db.query(sql, [myId, `%${query}%`, myId]);
         
-        // Convertimos el 1/0 de SQL a true/false para React
         const formatted = users.map(u => ({
             ...u,
-            lo_sigo: u.lo_sigo === 1
+            lo_sigo: u.follow_status === 'aceptado',
+            pendiente: u.follow_status === 'pendiente'
         }));
 
         res.json(formatted);
@@ -111,11 +116,37 @@ exports.followUser = async (req, res) => {
     if (parseInt(idUsuarioASequir) === myId) return res.status(400).json({ error: "No te puedes seguir a ti mismo" });
 
     try {
+        // Verificar si el usuario destino es privado
+        const [targetUser] = await db.query("SELECT es_privada, email, nombre_completo, username FROM usuarios WHERE idUsuario = ?", [idUsuarioASequir]);
+        
+        if (targetUser.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+
+        const isPrivate = targetUser[0].es_privada === 1;
+        const estadoInicial = isPrivate ? 'pendiente' : 'aceptado';
+
         await db.query(
-            "INSERT IGNORE INTO seguidores (seguidor_id, seguido_id) VALUES (?, ?)",
-            [myId, idUsuarioASequir]
+            "INSERT IGNORE INTO seguidores (seguidor_id, seguido_id, estado) VALUES (?, ?, ?)",
+            [myId, idUsuarioASequir, estadoInicial]
         );
-        res.json({ message: "Usuario seguido", lo_sigo: true });
+
+        // Notificación si es privado (Solicitud) o público (Seguido)
+        if (isPrivate) {
+            // Aquí podríamos enviar una notificación de "Solicitud de seguimiento"
+             try {
+                // await notifController.sendPush... (cuando se implemente)
+            } catch (e) {}
+             res.json({ message: "Solicitud enviada", lo_sigo: false, pendiente: true });
+        } else {
+             try {
+                await notifController.sendEmailNotification(
+                    targetUser[0].email,
+                    `¡Nuevo seguidor en Oxyra! 🚀`,
+                    `Hola <b>${targetUser[0].nombre_completo || targetUser[0].username}</b>,<br>Alguien ha comenzado a seguirte.`
+                );
+            } catch (emailErr) { console.error("Error email follow:", emailErr); }
+            res.json({ message: "Usuario seguido", lo_sigo: true, pendiente: false });
+        }
+
     } catch (err) {
         res.status(500).json({ error: "Error al seguir" });
     }
@@ -131,7 +162,7 @@ exports.unfollowUser = async (req, res) => {
             "DELETE FROM seguidores WHERE seguidor_id = ? AND seguido_id = ?",
             [myId, idUsuarioADejar]
         );
-        res.json({ message: "Dejado de seguir", lo_sigo: false });
+        res.json({ message: "Dejado de seguir", lo_sigo: false, pendiente: false });
     } catch (err) {
         res.status(500).json({ error: "Error al dejar de seguir" });
     }
@@ -142,14 +173,14 @@ exports.getPublicProfile = async (req, res) => {
     const myId = req.user.id;
 
     try {
-        // 1. Buscar al usuario por username
+        // 1. Buscar al usuario y verificar estado de seguimiento
         const [users] = await db.query(`
             SELECT 
-                idUsuario, username, nombre_completo, foto_perfil, biografia, rango_global, es_pro,
-                -- Verificamos si YO (myId) sigo a este usuario
-                (SELECT COUNT(*) FROM seguidores WHERE seguidor_id = ? AND seguido_id = usuarios.idUsuario) as lo_sigo
-            FROM usuarios 
-            WHERE username = ?`, 
+                u.idUsuario, u.username, u.nombre_completo, u.foto_perfil, u.biografia, u.rango_global, u.es_pro, u.es_privada,
+                s.estado as follow_status
+            FROM usuarios u
+            LEFT JOIN seguidores s ON s.seguidor_id = ? AND s.seguido_id = u.idUsuario
+            WHERE u.username = ?`, 
             [myId, username]
         );
 
@@ -157,21 +188,178 @@ exports.getPublicProfile = async (req, res) => {
 
         const targetUser = users[0];
         const targetId = targetUser.idUsuario;
+        const isMe = targetId === myId;
+        const isFollower = targetUser.follow_status === 'aceptado';
+        const isPrivate = targetUser.es_privada === 1;
 
-        // 2. CONTADORES REALES de ese usuario
+        // Lógica de privacidad: Si es privada, no soy yo, y no lo sigo -> RESTRINGIDO
+        const isRestricted = isPrivate && !isFollower && !isMe;
+
+        // 2. CONTADORES (Siempre visibles, estilo Instagram)
         const [counts] = await db.query(`
             SELECT 
-                (SELECT COUNT(*) FROM seguidores WHERE seguido_id = ?) as seguidores,
-                (SELECT COUNT(*) FROM seguidores WHERE seguidor_id = ?) as seguidos,
+                (SELECT COUNT(*) FROM seguidores WHERE seguido_id = ? AND estado = 'aceptado') as seguidores,
+                (SELECT COUNT(*) FROM seguidores WHERE seguidor_id = ? AND estado = 'aceptado') as seguidos,
                 (SELECT COUNT(*) FROM historial_workouts WHERE usuario_id = ?) as entrenos
         `, [targetId, targetId, targetId]);
 
+        let muscularStats = [];
+        let recentWorkouts = [];
+
+        // Solo cargamos detalles si NO está restringido
+        if (!isRestricted) {
+            // 3. Stats Musculares
+            const [ms] = await db.query(
+                "SELECT grupo_muscular, rango_actual FROM stats_musculares WHERE usuario_id = ?",
+                [targetId]
+            );
+            muscularStats = ms;
+
+            // 4. Activity History
+            const [rw] = await db.query(
+                "SELECT nombre_sesion, fecha_fin, duracion_minutos FROM historial_workouts WHERE usuario_id = ? ORDER BY fecha_fin DESC LIMIT 10",
+                [targetId]
+            );
+            recentWorkouts = rw;
+        }
+
         res.json({ 
             ...targetUser, 
-            lo_sigo: targetUser.lo_sigo === 1,
-            stats: counts[0] 
+            lo_sigo: isFollower,
+            pendiente: targetUser.follow_status === 'pendiente',
+            is_private_restricted: isRestricted,
+            stats: counts[0],
+            muscularStats,
+            recentWorkouts
         });
 
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// --- LISTAR SEGUIDORES / SEGUIDOS ---
+
+// GET /api/users/:username/followers
+exports.getFollowers = async (req, res) => {
+    const { username } = req.params;
+    const myId = req.user.id;
+
+    try {
+        // Buscar el ID del usuario por username
+        const [target] = await db.query("SELECT idUsuario FROM usuarios WHERE username = ?", [username]);
+        if (target.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+
+        const targetId = target[0].idUsuario;
+
+        // Obtener seguidores (quienes siguen a este usuario)
+        const [followers] = await db.query(`
+            SELECT 
+                u.idUsuario, u.username, u.nombre_completo, u.foto_perfil,
+                CASE WHEN my_follow.estado = 'aceptado' THEN 1 ELSE 0 END as lo_sigo
+            FROM seguidores s
+            JOIN usuarios u ON s.seguidor_id = u.idUsuario
+            LEFT JOIN seguidores my_follow ON my_follow.seguidor_id = ? AND my_follow.seguido_id = u.idUsuario AND my_follow.estado = 'aceptado'
+            WHERE s.seguido_id = ? AND s.estado = 'aceptado'
+            ORDER BY s.fecha_seguimiento DESC
+        `, [myId, targetId]);
+
+        const formatted = followers.map(u => ({
+            ...u,
+            lo_sigo: u.idUsuario === myId ? false : !!u.lo_sigo // No mostrar "seguir" a mí mismo
+        }));
+
+        res.json(formatted);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// GET /api/users/:username/following
+exports.getFollowing = async (req, res) => {
+    const { username } = req.params;
+    const myId = req.user.id;
+
+    try {
+        const [target] = await db.query("SELECT idUsuario FROM usuarios WHERE username = ?", [username]);
+        if (target.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+
+        const targetId = target[0].idUsuario;
+
+        // Obtener seguidos (a quienes sigue este usuario)
+        const [following] = await db.query(`
+            SELECT 
+                u.idUsuario, u.username, u.nombre_completo, u.foto_perfil,
+                CASE WHEN my_follow.estado = 'aceptado' THEN 1 ELSE 0 END as lo_sigo
+            FROM seguidores s
+            JOIN usuarios u ON s.seguido_id = u.idUsuario
+            LEFT JOIN seguidores my_follow ON my_follow.seguidor_id = ? AND my_follow.seguido_id = u.idUsuario AND my_follow.estado = 'aceptado'
+            WHERE s.seguidor_id = ? AND s.estado = 'aceptado'
+            ORDER BY s.fecha_seguimiento DESC
+        `, [myId, targetId]);
+
+        const formatted = following.map(u => ({
+            ...u,
+            lo_sigo: u.idUsuario === myId ? false : !!u.lo_sigo
+        }));
+
+        res.json(formatted);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// --- GESTIÓN DE SOLICITUDES (NUEVO) ---
+
+// Obtener solicitudes pendientes
+// Obtener actividad (Solicitudes + Nuevos Seguidores)
+exports.getFollowActivity = async (req, res) => {
+    try {
+        // Traemos pendientes (prioridad) y aceptados recientes (últimos 7 días)
+        const [activity] = await db.query(`
+            SELECT u.idUsuario, u.username, u.nombre_completo, u.foto_perfil, s.estado, s.fecha_seguimiento
+            FROM seguidores s
+            JOIN usuarios u ON s.seguidor_id = u.idUsuario
+            WHERE s.seguido_id = ?
+            AND (s.estado = 'pendiente' OR (s.estado = 'aceptado' AND s.fecha_seguimiento >= DATE_SUB(NOW(), INTERVAL 7 DAY)))
+            ORDER BY s.estado = 'pendiente' DESC, s.fecha_seguimiento DESC
+        `, [req.user.id]);
+        
+        res.json(activity);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Aceptar solicitud
+exports.acceptFollowRequest = async (req, res) => {
+    const { seguidorId } = req.body; // ID del usuario que quiere seguirme
+    const myId = req.user.id;
+    
+    try {
+        await db.query(`
+            UPDATE seguidores SET estado = 'aceptado' 
+            WHERE seguidor_id = ? AND seguido_id = ?
+        `, [seguidorId, myId]);
+        
+        res.json({ message: "Solicitud aceptada" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Rechazar solicitud
+exports.rejectFollowRequest = async (req, res) => {
+    const { seguidorId } = req.body;
+    const myId = req.user.id;
+
+    try {
+        await db.query(`
+            DELETE FROM seguidores 
+            WHERE seguidor_id = ? AND seguido_id = ?
+        `, [seguidorId, myId]);
+
+        res.json({ message: "Solicitud rechazada" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

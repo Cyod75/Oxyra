@@ -8,10 +8,12 @@ const compression = require('compression');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const aiRoutes = require('./routes/aiRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
-const MI_IP_LOCAL = 'http://100.114.0.145:5173'; 
+const MI_IP_LOCAL = 'http://192.168.1.144:5173'; 
 
 // Middlewares de Seguridad y Utilidades
 app.use(helmet());
@@ -22,6 +24,7 @@ app.use(morgan('dev'));
 app.use(cors({
     origin: [
         'http://localhost:5173',
+        'http://localhost:4173',
         MI_IP_LOCAL
     ],
     credentials: true,
@@ -58,6 +61,8 @@ app.use('/api/auth', authLimiter);
 // 4. Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Manejo de errores 404
 app.use((req, res) => {

@@ -1,44 +1,75 @@
 import React from "react";
 import { RANK_COLORS } from "../../config/ranksColors";
 
-export default function BodyFront({ colors = {} }) {
+export default function BodyFront({ colors = {}, onMuscleClick }) {
   const defaultC = RANK_COLORS["Sin Rango"];
+
+  const muscleMapping = {
+    'Trapecio': 'Trapecio',
+    'Pectoral': 'Pecho',
+    'Abdominal': 'Abdomen',
+    'Hombro': 'Hombro',
+    'Biceps': 'Bíceps',
+    'Antebrazo': 'Antebrazo',
+    'Cuadriceps': 'Cuadriceps',
+    'Aductor': 'Aductores',
+    'Gemelo': 'Gemelo',
+    'Gluteo': 'Gluteo'
+  };
+
+  const handleSvgClick = (e) => {
+    if (!onMuscleClick) return;
+    const path = e.target.closest('path');
+    if (!path || !path.id) return;
+
+    // Identificar el grupo muscular basándose en el prefijo del ID
+    const entry = Object.entries(muscleMapping).find(([idPrefix]) => path.id.includes(idPrefix));
+    if (entry) {
+      onMuscleClick(entry[1]);
+    }
+  };
 
   // CSS Dinámico OPTIMIZADO
   const dynamicStyles = `
     /* Regla Maestra: Todo path es gris por defecto (evita el negro) */
-    path { 
+    #body-front-svg path { 
       fill: ${defaultC}; 
-      transition: fill 0.4s ease; 
+      transition: all 0.4s ease; 
       cursor: pointer; 
       stroke: rgba(255,255,255,0.05); /* Sutil borde para definición */
       stroke-width: 0.5px;
     }
     
-    path:hover { filter: brightness(1.2); }
+    #body-front-svg path:hover { 
+        filter: brightness(1.25) saturate(1.1); 
+        stroke: rgba(255,255,255,0.2);
+    }
 
     /* Mapeo de Músculos (Sobrescribe el color base) */
-    path[id*="Trapecio"] { fill: ${colors['Trapecio'] || defaultC} !important; }
-    path[id*="Pectoral"] { fill: ${colors['Pecho'] || defaultC} !important; }
-    path[id*="Abdominal"] { fill: ${colors['Abdomen'] || defaultC} !important; }
+    #body-front-svg path[id*="Trapecio"] { fill: ${colors['Trapecio'] || defaultC} !important; }
+    #body-front-svg path[id*="Pectoral"] { fill: ${colors['Pecho'] || defaultC} !important; }
+    #body-front-svg path[id*="Abdominal"] { fill: ${colors['Abdomen'] || defaultC} !important; }
     
-    path[id*="Hombro"] { fill: ${colors['Hombro'] || defaultC} !important; }
-    path[id*="Biceps"] { fill: ${colors['Bíceps'] || defaultC} !important; }
-    path[id*="Antebrazo"] { fill: ${colors['Antebrazo'] || defaultC} !important; }
+    #body-front-svg path[id*="Hombro"] { fill: ${colors['Hombro'] || defaultC} !important; }
+    #body-front-svg path[id*="Biceps"] { fill: ${colors['Bíceps'] || defaultC} !important; }
+    #body-front-svg path[id*="Antebrazo"] { fill: ${colors['Antebrazo'] || defaultC} !important; }
 
-    path[id*="Cuadriceps"] { fill: ${colors['Cuadriceps'] || defaultC} !important; }
-    path[id*="Aductor"] { fill: ${colors['Aductores'] || defaultC} !important; }
-    path[id*="Gemelo"] { fill: ${colors['Gemelo'] || defaultC} !important; }
-    path[id*="Gluteo"] { fill: ${colors['Gluteo'] || defaultC} !important; }
+    #body-front-svg path[id*="Cuadriceps"] { fill: ${colors['Cuadriceps'] || defaultC} !important; }
+    #body-front-svg path[id*="Aductor"] { fill: ${colors['Aductores'] || defaultC} !important; }
+    #body-front-svg path[id*="Gemelo"] { fill: ${colors['Gemelo'] || defaultC} !important; }
+    #body-front-svg path[id*="Gluteo"] { fill: ${colors['Gluteo'] || defaultC} !important; }
   `;
 
   return (
     <svg
+      id="body-front-svg"
       viewBox="0 0 772.88818 1391.8351"
       preserveAspectRatio="xMidYMid meet" 
       className="w-full h-full drop-shadow-2xl"
       xmlns="http://www.w3.org/2000/svg"
+      onClick={handleSvgClick}
     >
+
       <style>{dynamicStyles}</style>
       
       <path

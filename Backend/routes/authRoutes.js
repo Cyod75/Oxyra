@@ -22,5 +22,17 @@ router.post('/register', [
 
 router.post('/login', authController.login);
 router.post('/google-login', authController.googleLogin);
+router.get('/check-username/:username', authController.checkUsername);
+router.get('/check-email/:email', authController.checkEmail);
+
+// Password Reset
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/verify-code', authController.verifyCode);
+router.post('/reset-password', authController.resetPassword);
+
+// Deletion
+const authMiddleware = require('../middlewares/authMiddleware');
+router.post('/send-deletion-code', authMiddleware, authController.sendDeletionCode);
+router.delete('/delete-account', authMiddleware, authController.deleteAccount);
 
 module.exports = router;

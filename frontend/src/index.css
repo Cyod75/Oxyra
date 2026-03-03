@@ -4,14 +4,17 @@
 
 @layer base {
   :root {
-    /* MODO CLARO (Limpio y técnico) */
-    --background: 0 0% 100%;       /* Blanco puro */
-    --foreground: 240 10% 3.9%;    /* Negro casi puro */
+    /* MODO CLARO */
+    --background: 0 0% 100%;
+    /* Blanco puro */
+    --foreground: 240 10% 3.9%;
+    /* Negro casi puro */
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 221.2 83.2% 53.3%;  /* Azul Eléctrico (Symmetry) */
+    --primary: 221.2 83.2% 53.3%;
+    /* Azul Eléctrico (Symmetry) */
     --primary-foreground: 210 40% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
@@ -24,37 +27,45 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;             /* Bordes más redondeados (Moderno) */
+    --radius: 0.75rem;
+    /* Bordes más redondeados (Moderno) */
   }
 
-  /* MODO OSCURO (ESTILO PREMIUM / HEVY) */
+  /* MODO OSCURO */
   .dark {
-    --background: 240 10% 3.9%;    /* #09090b (Zinc 950) - Negro Profundo Neutro */
-    --foreground: 0 0% 98%;        /* Blanco Hielo */
-    
+    --background: 240 10% 3.9%;
+    /* #09090b (Zinc 950) - Negro Profundo Neutro */
+    --foreground: 0 0% 98%;
+    /* Blanco Hielo */
+
     /* Tarjetas con ligera transparencia y negro suave */
-    --card: 240 10% 3.9%;          /* Mismo fondo para efecto 'flat' limpio */
+    --card: 240 10% 3.9%;
+    /* Mismo fondo para efecto 'flat' limpio */
     --card-foreground: 0 0% 98%;
-    
+
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    
-    --primary: 217.2 91.2% 59.8%;  /* Azul Neón Vibrante */
+
+    --primary: 217.2 91.2% 59.8%;
+    /* Azul Neón Vibrante */
     --primary-foreground: 222.2 47.4% 11.2%;
-    
-    --secondary: 240 3.7% 15.9%;   /* Zinc 800 para elementos secundarios */
+
+    --secondary: 240 3.7% 15.9%;
+    /* Zinc 800 para elementos secundarios */
     --secondary-foreground: 0 0% 98%;
-    
-    --muted: 240 3.7% 15.9%;       /* Zinc 800 para inputs inactivos */
+
+    --muted: 240 3.7% 15.9%;
+    /* Zinc 800 para inputs inactivos */
     --muted-foreground: 240 5% 64.9%;
-    
-    --accent: 240 3.7% 15.9%;      /* Hover effect */
+
+    --accent: 240 3.7% 15.9%;
+    /* Hover effect */
     --accent-foreground: 0 0% 98%;
-    
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    
-    --border: 240 3.7% 15.9%;      /* Bordes muy sutiles oscuros */
+
+    --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 217.2 91.2% 59.8%;
   }
@@ -64,12 +75,13 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
-/* CLASES DE UTILIDAD PARA GLASSMORPHISM (Añádelas al final) */
+/* CLASES DE UTILIDAD PARA GLASSMORPHISM*/
 .glass {
   @apply bg-background/60 backdrop-blur-md border-b border-white/5;
 }

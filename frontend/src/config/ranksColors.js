@@ -7,6 +7,7 @@ export const RANK_COLORS = {
     "Bronce": "#cd7f32",    // Bronce metálico
     "Plata": "#e4e4e7",     // zinc-200 Brillante
     "Oro": "#fbbf24",       // amber-400
+    "Platino": "#94a3b8",   // slate-400 (Platino)
     "Esmeralda": "#34d399", // emerald-400
     "Diamante": "#60a5fa",  // blue-400 (Oxyra Blue)
     "Campeon": "#a855f7",   // purple-500

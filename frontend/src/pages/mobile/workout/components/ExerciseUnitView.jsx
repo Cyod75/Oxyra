@@ -1,11 +1,19 @@
 import React, { useState, useMemo } from "react";
-import { IconDumbbell, IconTimer, IconPlus } from "../../../../components/icons/Icons";
+import { IconDumbbell, IconTimer, IconPlus, IconInfo } from "../../../../components/icons/Icons";
 import { Button } from "@/components/ui/button";
 import SetRow from "./SetRow";
 import ScrollPickerSheet from "./ScrollPickerSheet"; 
+import ExerciseInfoSheet from "./ExerciseInfoSheet";
+import { exerciseVisuals } from "../../../../data/exerciseVisuals";
 
 export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorkoutData, onSetComplete }) {
   
+  // --- DETECCIÓN DE VISUAL DEL EJERCICIO ---
+  const visualBaseUrl = exerciseData?.nombre ? exerciseVisuals[exerciseData.nombre] : null;
+
+  // Estado del modal de información
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+
   // Estado para controlar qué picker está abierto y para qué serie/campo
   const [pickerConfig, setPickerConfig] = useState({
     isOpen: false,
@@ -106,13 +114,35 @@ export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorko
 
   return (
     <div className="pb-20">
-      {/* Header Imagen */}
-      <div className="h-48 bg-zinc-900/50 flex items-center justify-center relative overflow-hidden mb-4">
-         <IconDumbbell className="w-24 h-24 text-zinc-800 absolute" />
-         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
-         <h1 className="relative z-10 text-2xl font-black text-foreground text-center px-4 mt-20 drop-shadow-md">
-            {exerciseData.nombre}
-         </h1>
+      {/* Header Imagen — Reproductor Visual Inmersivo */}
+      <div className="h-56 flex items-end justify-center relative overflow-hidden mb-4">
+        
+        {/* === CAPA 0: Fondo (Imagen o Fallback) === */}
+        {visualBaseUrl ? (
+          <img 
+            src={`${visualBaseUrl}0.jpg`} 
+            alt={exerciseData.nombre}
+            className="absolute inset-0 w-full h-full object-cover z-0"
+            loading="eager"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+        ) : (
+          /* Fallback: diseño original con icono dumbbell */
+          <div className="absolute inset-0 bg-zinc-900/50 flex items-center justify-center z-0">
+            <IconDumbbell className="w-24 h-24 text-zinc-800" />
+          </div>
+        )}
+
+        {/* === CAPA 1: Overlay de oscurecimiento (legibilidad) === */}
+        <div className="absolute inset-0 bg-black/50 z-10" />
+
+        {/* === CAPA 2: Gradiente inferior (fusión con app) === */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent z-10"></div>
+
+        {/* === CAPA 3: Texto del título (por encima de todo) === */}
+        <h1 className="relative z-20 text-2xl font-black text-foreground text-center px-4 pb-4 drop-shadow-lg">
+          {exerciseData.nombre}
+        </h1>
       </div>
 
       <div className="px-4">
@@ -123,13 +153,26 @@ export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorko
                 <span className="font-semibold">{exerciseData.grupo_muscular}</span>
             </div>
             
-            <button 
-                onClick={() => openPicker('timer', null, exerciseData.currentRestTimerSetting)}
-                className="flex items-center gap-2 bg-background border border-border px-4 py-2 rounded-lg shadow-sm active:scale-95 transition-transform"
-            >
-                <IconTimer className="w-4 h-4 text-primary" />
-                <span className="font-bold font-mono">{exerciseData.currentRestTimerSetting}s</span>
-            </button>
+            <div className="flex items-center gap-2">
+                {/* Botón Info — solo si hay visual disponible */}
+                {visualBaseUrl && (
+                    <button 
+                        onClick={() => setIsInfoOpen(true)}
+                        className="flex items-center justify-center w-10 h-10 bg-background border border-border rounded-full shadow-sm active:scale-90 transition-transform"
+                        aria-label="Ver técnica del ejercicio"
+                    >
+                        <IconInfo className="w-4 h-4 text-primary" />
+                    </button>
+                )}
+
+                <button 
+                    onClick={() => openPicker('timer', null, exerciseData.currentRestTimerSetting)}
+                    className="flex items-center gap-2 bg-background border border-border px-4 py-2 rounded-lg shadow-sm active:scale-95 transition-transform"
+                >
+                    <IconTimer className="w-4 h-4 text-primary" />
+                    <span className="font-bold font-mono">{exerciseData.currentRestTimerSetting}s</span>
+                </button>
+            </div>
         </div>
 
         {/* Tabla Headers */}
@@ -174,6 +217,14 @@ export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorko
         options={pickerConfig.type === 'timer' ? timerOptions : pickerConfig.type === 'weight' ? weightOptions : repsOptions}
         suffix={pickerConfig.type === 'timer' ? 's' : pickerConfig.type === 'weight' ? 'kg' : ''}
         onSave={handleSavePicker}
+      />
+
+      {/* Modal de Información del Ejercicio */}
+      <ExerciseInfoSheet
+        open={isInfoOpen}
+        onOpenChange={setIsInfoOpen}
+        exerciseName={exerciseData.nombre}
+        baseUrl={visualBaseUrl}
       />
     </div>
   );

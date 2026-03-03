@@ -39,7 +39,7 @@ const SortableItem = ({ item, onDelete, onRename, onStart, onClick }) => {
       dragControls={controls}
       // CORRECCIÓN CLAVE: Eliminado 'transition-transform' y 'active:z-10'
       // 'transition-transform' causaba el conflicto con las físicas de Framer
-      className="touch-none relative z-0 list-none mb-4" 
+      className="relative z-0 list-none mb-4" 
       whileDrag={{ 
         scale: 1.05, 
         zIndex: 100,

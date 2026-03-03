@@ -6,6 +6,7 @@ const notifController = require('../controllers/notificationController');
 const aiController = require('../controllers/aiController'); 
 const workoutController = require('../controllers/workoutController'); 
 const productController = require('../controllers/productController');
+const leaderboardController = require('../controllers/leaderboardController');
 
 // --- MIDDLEWARES ---
 const authMiddleware = require('../middlewares/authMiddleware');
@@ -45,9 +46,15 @@ router.post('/workout/save', authMiddleware, workoutController.saveWorkoutSessio
 router.get('/', authMiddleware, productController.getAllProducts);
 
 // BÚSQUEDA Y SOCIAL
+router.get('/leaderboard', authMiddleware, leaderboardController.getLeaderboard);
 router.get('/search', authMiddleware, userController.searchUsers);
 router.post('/follow', authMiddleware, userController.followUser);
 router.post('/unfollow', authMiddleware, userController.unfollowUser);
+router.get('/requests', authMiddleware, userController.getFollowActivity); // Solicitudes + Actividad
+router.post('/requests/accept', authMiddleware, userController.acceptFollowRequest); // NUEVO
+router.post('/requests/reject', authMiddleware, userController.rejectFollowRequest); // NUEVO
+router.get('/:username/followers', authMiddleware, userController.getFollowers);
+router.get('/:username/following', authMiddleware, userController.getFollowing);
 router.get('/profile/:username', authMiddleware, userController.getPublicProfile);
 
 module.exports = router;

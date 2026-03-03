@@ -3,41 +3,50 @@ import { NavLink } from "react-router-dom";
 import { IconHome, IconShop, IconStats, IconProfile } from "../icons/Icons"; 
 
 export default function MobileFooter() {
-  // Función para clases dinámicas limpia
   const getLinkClass = ({ isActive }) => {
-    const base = "flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-200";
-    const activeState = "text-primary scale-105 font-bold";
-    const inactiveState = "text-muted-foreground hover:text-foreground hover:bg-muted/20";
-    
-    return `${base} ${isActive ? activeState : inactiveState}`;
+    return `flex flex-col items-center justify-center group transition-colors duration-300 ${
+      isActive ? "text-blue-500" : "text-zinc-500 hover:text-zinc-300"
+    }`;
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 w-full bg-background border-t border-border z-50 h-16 pb-safe">
-      <nav className="flex justify-around items-center h-full px-2">
+    <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[360px] rounded-full bg-zinc-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden">
+      <nav className="flex items-center justify-between px-6 py-2" role="menubar">
         
-        {/* 1. ENTRENAR */}
-        <NavLink to="/" className={getLinkClass}>
-          <IconHome className="w-5 h-5" />
-          <span className="text-[10px] uppercase tracking-wide">Entrenar</span>
+        <NavLink to="/" className={getLinkClass} aria-label="Entrenar">
+          {({ isActive }) => (
+            <>
+              <IconHome className={`w-[22px] h-[22px] transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[10px] font-medium mt-1">Entrenar</span>
+            </>
+          )}
         </NavLink>
 
-        {/* 2. PRODUCTOS */}
-        <NavLink to="/products" className={getLinkClass}>
-          <IconShop className="w-5 h-5" />
-          <span className="text-[10px] uppercase tracking-wide">Tienda</span>
+        <NavLink to="/products" className={getLinkClass} aria-label="Tienda">
+          {({ isActive }) => (
+            <>
+              <IconShop className={`w-[22px] h-[22px] transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[10px] font-medium mt-1">Tienda</span>
+            </>
+          )}
         </NavLink>
 
-        {/* 3. ESTADÍSTICA */}
-        <NavLink to="/stats" className={getLinkClass}>
-          <IconStats className="w-5 h-5" />
-          <span className="text-[10px] uppercase tracking-wide">Progreso</span>
+        <NavLink to="/stats" className={getLinkClass} aria-label="Progreso">
+          {({ isActive }) => (
+            <>
+              <IconStats className={`w-[22px] h-[22px] transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[10px] font-medium mt-1">Progreso</span>
+            </>
+          )}
         </NavLink>
 
-        {/* 4. PERFIL */}
-        <NavLink to="/profile" className={getLinkClass}>
-           <IconProfile className="w-5 h-5" />
-          <span className="text-[10px] uppercase tracking-wide">Perfil</span>
+        <NavLink to="/profile" className={getLinkClass} aria-label="Perfil">
+          {({ isActive }) => (
+            <>
+              <IconProfile className={`w-[22px] h-[22px] transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[10px] font-medium mt-1">Perfil</span>
+            </>
+          )}
         </NavLink>
 
       </nav>

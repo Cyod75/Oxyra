@@ -1,15 +1,35 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { IconTrophy, IconLoader, IconRotate } from "../../components/icons/Icons"; 
+import { IconRotate, IconLoader, IconAlertCircle } from "../../components/icons/Icons"; 
 import { API_URL } from "../../config/api";
 import { getMuscleColor } from "../../config/ranksColors"; 
 
 import BodyFront from "../../components/shared/BodyFront"; 
 import BodyBack from "../../components/shared/BodyBack"; 
+import MuscleDetailSheet from "../../components/settings/sheets/MuscleDetailSheet";
+import RanksInfoSheet from "../../components/settings/sheets/RanksInfoSheet";
+import PhysiqueScanSheet from "../../components/settings/sheets/PhysiqueScanSheet";
+import ModernLoader from "../../components/shared/ModernLoader";
+
+// Icono de escáner personalizado para el botón
+const IconScan = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+    <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+    <line x1="7" y1="12" x2="17" y2="12" />
+  </svg>
+);
 
 export default function MobileStatistics() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [stats, setStats] = useState([]); 
   const [view, setView] = useState("front"); 
+  const [selectedMuscle, setSelectedMuscle] = useState(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isInfoSheetOpen, setIsInfoSheetOpen] = useState(false);
+  const [isScanSheetOpen, setIsScanSheetOpen] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -24,12 +44,19 @@ export default function MobileStatistics() {
       if (res.ok) {
         const data = await res.json();
         setStats(data.muscularStats || []);
+        setTimeout(() => setLoading(false), 900);
+      } else {
+        throw new Error("Error fetching stats");
       }
     } catch (error) {
       console.error("Error cargando stats:", error);
-    } finally {
-      setLoading(false);
-    }
+      setError(true);
+    } 
+  };
+
+  const handleMuscleClick = (muscle) => {
+    setSelectedMuscle(muscle);
+    setIsSheetOpen(true);
   };
 
   const muscleColors = useMemo(() => {
@@ -43,67 +70,94 @@ export default function MobileStatistics() {
     return map;
   }, [stats]);
 
-  if (loading) return <div className="h-full flex items-center justify-center"><IconLoader className="animate-spin text-primary w-8 h-8" /></div>;
+  if (loading || error) return (
+    <div className="min-h-screen w-full bg-background flex items-center justify-center overflow-hidden">
+        <ModernLoader text={error ? "ERROR DE CONEXIÓN" : "SINCRONIZANDO BIOMETRÍA..."} />
+    </div>
+  );
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-background overflow-hidden">
+    <div className="relative w-full h-full flex flex-col bg-background overflow-hidden animate-in fade-in duration-500">
       
-      {/* FONDO AMBIENTAL */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* --- UNIFIED CONTROL CAPSULE --- */}
+      <div className="absolute right-6 top-6 z-30">
+        <div className="flex flex-col gap-1 p-1 rounded-2xl bg-secondary/30 backdrop-blur-md border border-border/50 shadow-sm">
+            
+            {/* Info Button */}
+            <button 
+                onClick={() => setIsInfoSheetOpen(true)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground transition-all hover:text-primary hover:bg-background/50 active:scale-95"
+            >
+                <IconAlertCircle className="w-5 h-5" />
+            </button>
+            
+            {/* Divider */}
+            <div className="h-px w-full px-2">
+                <div className="h-full w-full bg-border/50" />
+            </div>
 
-      {/* BARRA DE HERRAMIENTAS FLOTANTE SUPERIOR */}
-      <div className="absolute top-4 right-4 z-20 flex flex-col gap-3 items-end">
-        
-        {/* Nivel */}
-        <div className="bg-card/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
-            <IconTrophy className="w-3.5 h-3.5 text-yellow-500" />
-            <span className="text-[11px] font-bold text-foreground">Nivel 12</span>
+            {/* AI Scan Button */}
+            <button 
+                onClick={() => setIsScanSheetOpen(true)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground transition-all hover:text-blue-500 hover:bg-blue-500/10 active:scale-95 relative group"
+                title="Escaneo Corporal IA"
+            >
+                <IconScan className="w-5 h-5" />
+                {/* PRO dot indicator */}
+                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-background" />
+            </button>
+
+            {/* Divider */}
+            <div className="h-px w-full px-2">
+                <div className="h-full w-full bg-border/50" />
+            </div>
+
+            {/* Rotate Button */}
+            <button 
+                onClick={() => setView(prev => prev === "front" ? "back" : "front")}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground transition-all hover:text-foreground hover:bg-background/50 active:scale-95"
+            >
+                <IconRotate className={`w-5 h-5 transition-transform duration-500 ${view === 'back' ? 'rotate-180' : ''}`} />
+            </button>
+
         </div>
-
-        {/* Botón Rotar */}
-        <button 
-            onClick={() => setView(prev => prev === "front" ? "back" : "front")}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-card/60 backdrop-blur-md border border-white/10 shadow-lg active:scale-95 transition-all text-primary hover:bg-primary hover:text-white"
-        >
-            <IconRotate className="w-5 h-5" />
-        </button>
       </div>
 
-      {/* TÍTULO DISCRETO (Izquierda) */}
-      <div className="absolute top-6 left-6 z-10 opacity-80">
-         <h2 className="text-lg font-black tracking-tighter italic uppercase text-foreground/80">Oxyra</h2>
-      </div>
+      {/* --- MAIN CHARACTER STAGE --- */}
+      <div className="absolute inset-0 flex items-center justify-center z-10 px-6 pt-10 pb-20">
+        
+        {/* Sombra de Contacto Sutil */}
+        <div className="absolute bottom-[12%] w-[40%] h-[15px] bg-black/10 blur-xl rounded-full pointer-events-none dark:bg-black/30" />
 
-      {/* VISUALIZADOR 3D GIGANTE */}
-      <div className="flex-1 w-full h-full flex items-center justify-center z-0">
-        {/* max-h-[85vh] para aprovechar al máximo la pantalla vertical */}
-        <div className="relative w-full h-full max-h-[85vh] p-0 transition-all duration-700 animate-in fade-in zoom-in-95 flex items-center justify-center">
+        <div className="relative w-full h-full max-h-[82vh] scale-105 flex items-center justify-center transition-all duration-700 animate-in zoom-in-95 fill-mode-both origin-center">
             {view === "front" ? (
-                <BodyFront colors={muscleColors} />
+                <BodyFront colors={muscleColors} onMuscleClick={handleMuscleClick} />
             ) : (
-                <BodyBack colors={muscleColors} />
+                <BodyBack colors={muscleColors} onMuscleClick={handleMuscleClick} />
             )}
         </div>
       </div>
 
-      {/* LEYENDA FLOTANTE INFERIOR */}
-      <div className="absolute bottom-4 left-0 w-full flex justify-center z-10 pointer-events-none">
-         <div className="flex items-center gap-4 px-4 py-2 rounded-full bg-background/40 backdrop-blur-md border border-white/5 pointer-events-auto">
-            <LegendItem color="bg-zinc-700" label="Base" />
-            <LegendItem color="bg-amber-400" label="Fuerte" />
-            <LegendItem color="bg-blue-400" label="Élite" />
-         </div>
-      </div>
+
+      {/* --- SHEETS & MODALS --- */}
+      <MuscleDetailSheet 
+        open={isSheetOpen} 
+        onOpenChange={setIsSheetOpen} 
+        muscle={selectedMuscle} 
+        stats={stats} 
+      />
+      
+      <RanksInfoSheet 
+        open={isInfoSheetOpen} 
+        onOpenChange={setIsInfoSheetOpen} 
+      />
+
+      <PhysiqueScanSheet
+        open={isScanSheetOpen}
+        onOpenChange={setIsScanSheetOpen}
+        onScanComplete={fetchStats}
+      />
 
     </div>
   );
-}
-
-function LegendItem({ color, label }) {
-    return (
-        <div className="flex items-center gap-1.5">
-            <div className={`w-2 h-2 rounded-full ${color}`} />
-            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{label}</span>
-        </div>
-    );
 }

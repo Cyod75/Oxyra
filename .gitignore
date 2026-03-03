@@ -24,6 +24,8 @@ frontend/dist/
 frontend/dist-ssr/
 backend/dist/
 backend/dist-ssr/
+frontend/dev-dist/
+dev-dist/
 frontend/*.local
 
 # ========================
@@ -49,7 +51,7 @@ backend/*.local
 # ========================
 ## Storage containing keys (private keys must NOT be committed)
 storage/
-
+BD/
 # Environment files (may contain secrets)
 .env
 .env.*
