@@ -5,12 +5,12 @@ import { IconHome, IconShop, IconStats, IconProfile } from "../icons/Icons";
 export default function MobileFooter() {
   const getLinkClass = ({ isActive }) => {
     return `flex flex-col items-center justify-center group transition-colors duration-300 ${
-      isActive ? "text-blue-500" : "text-zinc-500 hover:text-zinc-300"
+      isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
     }`;
   };
 
   return (
-    <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[360px] rounded-full bg-zinc-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden">
+    <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[360px] rounded-full bg-card/80 backdrop-blur-xl border border-border shadow-xl dark:shadow-2xl shadow-zinc-500/10 dark:shadow-black/50 overflow-hidden">
       <nav className="flex items-center justify-between px-6 py-2" role="menubar">
         
         <NavLink to="/" className={getLinkClass} aria-label="Entrenar">
