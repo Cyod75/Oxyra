@@ -307,12 +307,12 @@ export default function MobileSettings() {
             <SettingsRow
               icon={<IconDoc />}
               label={t("settings.privacy_policy")}
-              onClick={() => window.open("#", "_blank")}
+              onClick={() => window.open("https://jordi.informaticamajada.es/privacy.html", "_blank")}
             />
             <SettingsRow
               icon={<IconDoc />}
               label={t("settings.terms")}
-              onClick={() => window.open("#", "_blank")}
+              onClick={() => window.open("https://jordi.informaticamajada.es/terms.html", "_blank")}
             />
           </SettingsSection>
 
