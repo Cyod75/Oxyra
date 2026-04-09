@@ -48,12 +48,12 @@ jobs:
           path: build-artefacto
 
       - name: Enviar Build Frontend al VPS (RSync)
-        uses: easingthemes/ssh-deploy@main
+        uses: easingthemes/ssh-deploy@v2.2.11
         env:
           SSH_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           ARGS: "-rlgoDzvc -i --delete"
           SOURCE: "build-artefacto/"
-          REMOTE_HOST: ${{ secrets.IP }}
+          REMOTE_HOST: "187.33.145.101"
           REMOTE_USER: "Jordi"
           REMOTE_PORT: "2222"
           TARGET: "/var/www/html/Oxyra/frontend/dist"
