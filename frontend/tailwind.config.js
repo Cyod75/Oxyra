@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ["class"], // Importante: shadcn usa la clase 'dark'
+  darkMode: ["class"], // shadcn usa la clase 'dark'
   content: [
     './pages/**/*.{js,jsx}',
     './components/**/*.{js,jsx}',
@@ -50,7 +50,6 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // TUS COLORES DE RANGOS (SYMMETRY)
         rank: {
           bronze: "#CD7F32",
           silver: "#C0C0C0",

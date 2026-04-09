@@ -6,7 +6,7 @@ export default function ModernLoader({ text = "PREPARANDO TIENDA..." }) {
   const rgbBase = isDark ? "255, 255, 255" : "30, 30, 35";
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full min-h-[600px] bg-background/50 backdrop-blur-sm z-50 transition-colors duration-500">
+    <div className="flex flex-col items-center justify-center pt-24 fixed inset-0 overflow-hidden bg-background/50 backdrop-blur-md z-[9999] transition-colors duration-500 touch-none">
       <style>{`
         :root {
             /* Tamaño grande para impacto */

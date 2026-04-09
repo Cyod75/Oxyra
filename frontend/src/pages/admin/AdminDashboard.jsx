@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { API_URL } from "../../config/api";
+import { oxyConfirm } from "../../utils/customAlert";
 import { 
   IconUser, IconLock, IconCheck, IconX, IconEye, IconEyeOff 
 } from "../../components/icons/Icons";
 
-// Componente de Select Personalizado (Estilo Oxyra)
 const RoleSelect = ({ value, onChange }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
@@ -132,6 +132,7 @@ export default function AdminDashboard() {
         setSuccess("");
     };
 
+    // Crear usuario directamente
     const handleCreateUser = async (e) => {
         e.preventDefault();
         setActionLoading(true);
@@ -162,7 +163,7 @@ export default function AdminDashboard() {
     };
 
     const handleDeleteUser = async (user) => {
-        if (!window.confirm(`¿Seguro que quieres eliminar a ${user.username}? Esta acción es irreversible.`)) return;
+        if (!(await oxyConfirm(`¿Seguro que quieres eliminar a ${user.username}? Esta acción es irreversible.`))) return;
         
         setActionLoading(true);
         try {
@@ -196,18 +197,10 @@ export default function AdminDashboard() {
     const myRole = userData.rol;
 
     const canDeleteUser = (targetUser) => {
-        // 1. No puedes eliminarte a ti mismo
         if (targetUser.idUsuario === myId) return false;
-
-        // 2. Si el objetivo es un superadmin, NADIE lo puede eliminar desde aquí
         if (targetUser.rol === 'superadmin') return false;
-
-        // 3. Si soy superadmin, puedo eliminar admin y usuario (superadmin ya filtrado arriba)
         if (myRole === 'superadmin') return true;
-
-        // 4. Si soy admin, SOLO puedo eliminar 'usuario'. No otros 'admin'.
         if (myRole === 'admin' && targetUser.rol === 'usuario') return true;
-
         return false;
     };
 
@@ -236,7 +229,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* SECCIÓN CREAR USUARIO */}
-            <section className="bg-zinc-900/30 border border-zinc-800/50 rounded-[40px] p-6 md:p-10 backdrop-blur-md relative ring-1 ring-white/5">
+            <section className="bg-zinc-900/30 border border-zinc-800/50 rounded-[40px] p-6 md:p-10 backdrop-blur-md relative ring-1 ring-white/5 overflow-hidden">
                 <div className="flex items-center gap-5 mb-10">
                     <div className="p-4 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[22px] shadow-lg shadow-blue-900/20">
                         <IconUser className="w-6 h-6 text-white" />
@@ -247,71 +240,70 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                <form onSubmit={handleCreateUser} className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                        <FormInput 
-                            label="Nombre Real"
-                            icon={<IconUser className="w-5 h-5" />}
-                            type="text"
-                            name="nombre_completo"
-                            placeholder="Ej. David de Jesus"
-                            value={formData.nombre_completo}
-                            onChange={handleFormChange}
-                        />
-                        <FormInput 
-                            label="Identificador"
-                            icon={<span className="font-black text-sm">@</span>}
-                            type="text"
-                            name="username"
-                            placeholder="david_fit"
-                            value={formData.username}
-                            onChange={handleFormChange}
-                        />
-                        <FormInput 
-                            label="Correo Contacto"
-                            icon={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5"><path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" /><path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" /></svg>}
-                            type="email"
-                            name="email"
-                            placeholder="david@oxyra.app"
-                            value={formData.email}
-                            onChange={handleFormChange}
-                        />
-                        <FormInput 
-                            label="Contraseña"
-                            icon={<IconLock className="w-5 h-5" />}
-                            type={showPassword ? "text" : "password"}
-                            name="password"
-                            placeholder="Seguridad alta"
-                            value={formData.password}
-                            onChange={handleFormChange}
-                            rightElement={
-                                <button
-                                    type="button"
-                                    className="p-1 px-2 text-zinc-500 hover:text-white transition-colors"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? <IconEyeOff className="w-5 h-5" /> : <IconEye className="w-5 h-5" />}
-                                </button>
-                            }
-                        />
-                        
-                        {/* Selector de Rol Personalizado */}
-                        <RoleSelect 
-                            value={formData.rol}
-                            onChange={handleFormChange}
-                        />
+                    <form onSubmit={handleCreateUser} className="space-y-8 animate-fade-in">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                            <FormInput 
+                                label="Nombre Real"
+                                icon={<IconUser className="w-5 h-5" />}
+                                type="text"
+                                name="nombre_completo"
+                                placeholder="Ej. David de Jesus"
+                                value={formData.nombre_completo}
+                                onChange={handleFormChange}
+                            />
+                            <FormInput 
+                                label="Identificador"
+                                icon={<span className="font-black text-sm">@</span>}
+                                type="text"
+                                name="username"
+                                placeholder="david_fit"
+                                value={formData.username}
+                                onChange={handleFormChange}
+                            />
+                            <FormInput 
+                                label="Correo Contacto"
+                                icon={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5"><path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" /><path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" /></svg>}
+                                type="email"
+                                name="email"
+                                placeholder="david@oxyra.app"
+                                value={formData.email}
+                                onChange={handleFormChange}
+                            />
+                            <FormInput 
+                                label="Contraseña"
+                                icon={<IconLock className="w-5 h-5" />}
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                placeholder="Seguridad alta"
+                                value={formData.password}
+                                onChange={handleFormChange}
+                                rightElement={
+                                    <button
+                                        type="button"
+                                        className="p-1 px-2 text-zinc-500 hover:text-white transition-colors"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? <IconEyeOff className="w-5 h-5" /> : <IconEye className="w-5 h-5" />}
+                                    </button>
+                                }
+                            />
+                            
+                            <RoleSelect 
+                                value={formData.rol}
+                                onChange={handleFormChange}
+                            />
 
-                        <div className="flex items-end flex-1 min-w-[280px]">
-                            <button 
-                                type="submit" 
-                                disabled={actionLoading}
-                                className="w-full bg-white text-black font-black h-[54px] rounded-2xl shadow-xl shadow-white/5 hover:bg-zinc-100 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
-                            >
-                                {actionLoading ? <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" /> : "ACTIVAR CUENTA"}
-                            </button>
+                            <div className="flex items-end flex-1 min-w-[280px]">
+                                <button 
+                                    type="submit" 
+                                    disabled={actionLoading}
+                                    className="w-full bg-white text-black font-black h-[54px] rounded-2xl shadow-xl shadow-white/5 hover:bg-zinc-100 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
+                                >
+                                    {actionLoading ? <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" /> : "REGISTRAR USUARIO"}
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
             </section>
 
             {/* LISTADO DE USUARIOS - RESPONSIVE CARDS */}
@@ -352,7 +344,7 @@ export default function AdminDashboard() {
                                     <div className="relative flex-shrink-0">
                                         <div className={`absolute -inset-1 rounded-2xl blur-[8px] opacity-0 group-hover:opacity-40 transition-opacity bg-blue-500`} />
                                         <img 
-                                            src={user.foto_perfil.startsWith('http') ? user.foto_perfil : `${API_URL}/${user.foto_perfil}`} 
+                                            src={user.foto_perfil && user.foto_perfil.startsWith('http') ? user.foto_perfil : `${API_URL}/${user.foto_perfil || 'uploads/default-avatar.png'}`} 
                                             alt={user.username} 
                                             className="w-12 h-12 md:w-14 md:h-14 rounded-2xl object-cover ring-2 ring-zinc-800 group-hover:ring-blue-600 transition-all relative z-10"
                                             onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${user.username}&background=111&color=fff&bold=true`}}
@@ -378,7 +370,7 @@ export default function AdminDashboard() {
                                             }`}>
                                                 {user.rol}
                                             </div>
-                                            {user.rango_global !== 'Sin Rango' && (
+                                            {user.rango_global && user.rango_global !== 'Sin Rango' && (
                                                 <div className="px-2 py-0.5 rounded-lg bg-zinc-800/40 border border-zinc-800/60 text-[8px] font-black text-zinc-400">
                                                     {user.rango_global}
                                                 </div>

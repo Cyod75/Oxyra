@@ -1,42 +1,54 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { API_URL } from '../../config/api';
 // ICONOS
-import { IconSettings, IconHeart } from "../../components/icons/Icons";
+import { IconSettings, IconHeart, IconScanBody, IconChevronRight } from "../../components/icons/Icons";
 
-// SHADCN UI
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+// NUESTRO NUEVO AVATAR
+import DefaultAvatar from "../../components/DefaultAvatar";
+
 // COMPONENTE REUTILIZABLE
-import ProfileSheet from "../../components/settings/sheets/ProfileSheet";
 import FollowRequestsSheet from "../../components/settings/sheets/FollowRequestsSheet";
+import SubscriptionSheet from "../../components/settings/sheets/SubscriptionSheet";
+
+// HOOKS
+import { useSubscription } from "../../hooks/useSubscription";
 // IMPORTAR EL LOADER
 import ModernLoader from "../../components/shared/ModernLoader";
-
-const DEFAULT_AVATAR = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+import { useConnection } from "../../context/ConnectionContext";
+import VolumeChart from "../../components/profile/VolumeChart";
+import { oxyAlert } from "../../utils/customAlert";
 
 export default function MobileProfile() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { reportError } = useConnection();
   
   // Estado para controlar el Popup de edición
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [showRequests, setShowRequests] = useState(false); // NUEVO ESTADO
+  const [showSubscription, setShowSubscription] = useState(false);
+
+  // Hook Pro
+  const { isPro, daysLeft, loading: subLoading, handleSubscribe, handleCancel } = useSubscription();
 
   // Estado del usuario
   const [user, setUser] = useState({
-    nombre: "Cargando...",
+    idUsuario: null,
+    nombre: t("profile.loading"),
     username: "...",
     biografia: "",
-    foto_perfil: DEFAULT_AVATAR,
+    foto_perfil: null,
     peso: "",
     altura: "",
     genero: "M",
     stats: { entrenos: 0, seguidores: 0, seguidos: 0 },
-    es_pro: false 
+    es_pro: false,
+    muscularStats: []
   });
 
   // 1. CARGAR DATOS
@@ -53,15 +65,16 @@ export default function MobileProfile() {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      if (!response.ok) throw new Error("Error al cargar perfil");
+      if (!response.ok) throw new Error(t("profile.error_loading"));
       
       const data = await response.json();
 
       setUser({
-          nombre: data.nombre_completo || "Usuario",
+          idUsuario: data.idUsuario ?? null,
+          nombre: data.nombre_completo || t("profile.default_user"),
           username: data.username,
           biografia: data.biografia || "",
-          foto_perfil: data.foto_perfil || DEFAULT_AVATAR,
+          foto_perfil: data.foto_perfil ?? null,
           
           // IMPORTANTE: Mapeo exacto con los nombres que devolvemos ahora en el backend
           peso: data.peso_kg || "",
@@ -73,14 +86,15 @@ export default function MobileProfile() {
               seguidores: data.stats?.seguidores || 0, 
               seguidos: data.stats?.seguidos || 0 
           },
-          es_pro: data.es_pro === 1
+          es_pro: data.es_pro === 1,
+          muscularStats: data.muscularStats || [],
       });
 
       setLoading(false);
 
     } catch (error) {
       console.error(error);
-      setError(true);
+      reportError();
     }
   };
 
@@ -90,29 +104,29 @@ export default function MobileProfile() {
     if (navigator.share) {
         try {
             await navigator.share({
-                title: `Perfil de ${user.nombre}`,
-                text: '¡Entrena conmigo en Oxyra!',
+                title: t("profile.share_title", { name: user.nombre }),
+                text: t("profile.share_text"),
                 url: shareUrl
             });
             return; 
         } catch (err) {
-            console.log("Compartir cancelado");
+            console.log(t("profile.share_cancelled"));
         }
     }
 
     try {
         await navigator.clipboard.writeText(shareUrl);
-        alert("Enlace copiado al portapapeles"); 
+        await oxyAlert(t("profile.link_copied")); 
     } catch (err) {
-        alert("No se pudo copiar el enlace automáticamente");
+        await oxyAlert(t("profile.link_copy_error"));
     }
   };
 
-  // 4. BLOQUEO DE SEGURIDAD (SOLUCIÓN LOADER)
-  if (loading || error) {
+  // BLOQUEO DE SEGURIDAD (SOLUCIÓN LOADER)
+  if (loading) {
     return (
         <div className="min-h-screen w-full bg-background flex items-center justify-center overflow-hidden pt-[108px]">
-            <ModernLoader text={error ? "ERROR DE CONEXIÓN" : "PREPARANDO PERFIL..."} />
+            <ModernLoader text={t("profile.preparing_profile")} />
         </div>
     );
   }
@@ -121,12 +135,14 @@ export default function MobileProfile() {
     <div className="min-h-screen bg-background pb-24 font-sans text-foreground animate-in fade-in duration-500">
       
       {/* HEADER */}
-      <div className="flex items-center justify-between px-4 pt-6 pb-2">
-         <h1 className="text-xl font-bold tracking-tight">@{user.username}</h1>
+      <div 
+        className="flex items-center justify-between px-4 pb-2"
+        style={{ paddingTop: 'calc(1.5rem + var(--safe-area-top))' }}
+      >
+         <h1 className="text-xl font-bold tracking-tight ml-2">{user.username}</h1>
          <div className="flex items-center gap-5">
-            <div onClick={() => setShowRequests(true)} className="relative cursor-pointer text-muted-foreground hover:text-blue-500 transition-colors duration-300">
+            <div onClick={() => setShowRequests(true)} className="relative cursor-pointer text-muted-foreground hover:text-foreground transition-colors duration-300">
                 <IconHeart />
-                {/* Indicador de pendientes podría ir aquí si tuviéramos el count disponible en user object */}
             </div>
             <div onClick={() => navigate("/settings")} className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
                 <IconSettings />
@@ -137,28 +153,32 @@ export default function MobileProfile() {
       {/* INFO PERFIL */}
       <div className="px-4 mt-4 mb-6">
         <div className="flex items-center gap-6">
-           <Avatar className="h-24 w-24 border border-border shadow-sm">
-              <AvatarImage src={user.foto_perfil} className="object-cover" />
-              <AvatarFallback>OX</AvatarFallback>
-           </Avatar>
+           <DefaultAvatar 
+              userId={user.idUsuario ?? user.username} 
+              name={user.nombre}
+              src={user.foto_perfil} 
+              size="h-24 w-24"
+              className="border border-border shadow-sm"
+              muscularStats={user.muscularStats}
+           />
 
            <div className="flex-1 flex flex-col gap-3">
               <div className="flex flex-col">
                  <span className="font-bold text-lg leading-none">{user.nombre}</span>
                  {user.es_pro && (
                     <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 uppercase tracking-widest mt-1">
-                        Pro Athlete
+                        {t("profile.pro_athlete")}
                     </span>
                  )}
               </div>
 
               <div className="flex justify-between pr-4">
-                 <StatItem label="Entrenos" num={user.stats.entrenos} />
+                 <StatItem label={t("profile.workouts")} num={user.stats.entrenos} />
                  <div onClick={() => navigate(`/profile/${user.username}/followers`)} className="cursor-pointer hover:opacity-80 active:scale-95 transition-all">
-                   <StatItem label="Seguidores" num={user.stats.seguidores} />
+                   <StatItem label={t("profile.followers")} num={user.stats.seguidores} />
                  </div>
                  <div onClick={() => navigate(`/profile/${user.username}/following`)} className="cursor-pointer hover:opacity-80 active:scale-95 transition-all">
-                   <StatItem label="Seguidos" num={user.stats.seguidos} />
+                   <StatItem label={t("profile.following")} num={user.stats.seguidos} />
                  </div>
                </div>
            </div>
@@ -166,7 +186,7 @@ export default function MobileProfile() {
 
         <div className="mt-4">
            <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-             {user.biografia || "Añade una descripción sobre ti."}
+             {user.biografia || t("profile.add_bio")}
            </p>
         </div>
       </div>
@@ -176,10 +196,10 @@ export default function MobileProfile() {
         <div className="flex gap-3">
            <Button 
              variant="outline" 
-             onClick={() => setIsSheetOpen(true)}
+             onClick={() => navigate('/profile/edit')}
              className="flex-1 h-9 rounded-lg font-semibold bg-secondary/50 border-0 text-foreground hover:bg-secondary transition-colors"
            >
-             Editar Perfil
+             {t("profile.edit_profile")}
            </Button>
            
            <Button 
@@ -187,38 +207,35 @@ export default function MobileProfile() {
              onClick={handleShareProfile}
              className="flex-1 h-9 rounded-lg font-semibold bg-secondary/50 border-0 text-foreground hover:bg-secondary transition-colors"
            >
-              Compartir
+              {t("profile.share")}
            </Button>
         </div>
       </div>
 
-      {/* GRÁFICA */}
-      <div className="px-4">
-        <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Consistencia</h3>
-            <span className="text-xs text-muted-foreground">Últimos 7 días</span>
+      {/* BANNER IA ESCANEO CORPORAL */}
+      {!isPro && (
+        <div className="px-4 mb-8">
+          <div 
+            onClick={() => setShowSubscription(true)}
+            className="flex items-center justify-between px-4 py-3 rounded-[1rem] cursor-pointer transition-all active:scale-95 border border-indigo-500/20 shadow-md relative overflow-hidden"
+            style={{ background: 'linear-gradient(100deg, #111827 0%, #1e3a8a 150%)' }}
+          >
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="text-indigo-100 opacity-90 shrink-0">
+                 <IconScanBody className="w-10 h-10" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-white text-[16px] tracking-tight">{t("profile.scan_body")}</span>
+                <span className="text-[12px] text-indigo-200/60 font-medium mt-0.5">{t("profile.scan_body_sub")}</span>
+              </div>
+            </div>
+            <IconChevronRight className="w-5 h-5 text-white/50 shrink-0 relative z-10" />
+          </div>
         </div>
-        <Card className="bg-card/40 border-border/40 shadow-none">
-           <CardContent className="p-4 flex items-end justify-between h-32 gap-1">
-              {[20, 45, 30, 80, 55, 90, 40].map((val, i) => (
-                 <div key={i} className="w-full relative group">
-                    <div 
-                      className={`w-full rounded-t-sm transition-all ${val > 0 ? 'bg-primary hover:bg-primary/80' : 'bg-secondary'}`} 
-                      style={{ height: `${val || 5}%`, opacity: val > 0 ? 1 : 0.3 }} 
-                    />
-                 </div>
-              ))}
-           </CardContent>
-        </Card>
-      </div>
+      )}
 
-      {/* POPUP DE EDICIÓN */}
-      <ProfileSheet 
-        open={isSheetOpen} 
-        onOpenChange={setIsSheetOpen} 
-        onUpdate={fetchProfile}
-        userData={user} 
-      />
+      {/* GRÁFICA DE VOLUMEN */}
+      <VolumeChart />
 
       {/* POPUP DE SOLICITUDES */}
       <FollowRequestsSheet 
@@ -227,6 +244,15 @@ export default function MobileProfile() {
         onUpdate={fetchProfile}
       />
 
+      <SubscriptionSheet
+        open={showSubscription}
+        onOpenChange={setShowSubscription}
+        isPro={isPro}
+        daysLeft={daysLeft}
+        loading={subLoading}
+        onSubscribe={handleSubscribe}
+        onCancel={handleCancel}
+      />
     </div>
   );
 }

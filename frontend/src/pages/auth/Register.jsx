@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   IconBackArrow,
   IconUser,
@@ -12,7 +13,7 @@ import {
 import { API_URL } from "../../config/api";
 import DesktopAuthLayout from "../../components/layouts/DesktopAuthLayout";
 
-// ─── Icono Email inline ──────────────────────────────────────────────────────
+//  Icono Email inline 
 const IconEmail = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={className} aria-hidden="true">
     <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
@@ -20,7 +21,7 @@ const IconEmail = ({ className }) => (
   </svg>
 );
 
-// ─── Input reutilizable ──────────────────────────────────────────────────────
+//  Input reutilizable 
 const FormInput = ({
   label,
   icon,
@@ -53,7 +54,7 @@ const FormInput = ({
   </div>
 );
 
-// ─── Algoritmo de fuerza de contraseña ───────────────────────────────────────
+//  Algoritmo de fuerza de contraseña 
 const checkPasswordStrength = (pass) => {
   let score = 0;
   if (pass.length > 5) score++;
@@ -64,11 +65,10 @@ const checkPasswordStrength = (pass) => {
 };
 
 const strengthColors = ["", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500"];
-const strengthLabels = ["", "Débil", "Media", "Media", "Fuerte"];
-
-// ─── Formulario de Registro (compartido) ─────────────────────────────────────
 function RegisterForm({ onBack }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const strengthLabels = ["", t("auth.register.strength_weak"), t("auth.register.strength_medium"), t("auth.register.strength_medium"), t("auth.register.strength_strong")];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -140,11 +140,11 @@ function RegisterForm({ onBack }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (usernameAvailable === false) {
-      setError("El nombre de usuario no está disponible");
+      setError(t("auth.register.username_available_error"));
       return;
     }
     if (emailAvailable === false) {
-      setError("El correo electrónico ya está registrado");
+      setError(t("auth.register.email_available_error"));
       return;
     }
     setLoading(true);
@@ -157,8 +157,10 @@ function RegisterForm({ onBack }) {
         body: JSON.stringify(formData),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error al registrarse");
-      navigate("/login");
+      if (!response.ok) throw new Error(data.error || t("auth.register.error_fallback"));
+      
+      // Pasar el email por el state para que lo lea VerifyEmail
+      navigate("/verify-email", { state: { email: formData.email } });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -180,19 +182,19 @@ function RegisterForm({ onBack }) {
       <button
         id="register-back-btn"
         onClick={onBack || (() => navigate("/welcome"))}
-        className="group mb-6 -ml-1 p-2 w-fit rounded-full hover:bg-white/10 transition-colors duration-200"
-        aria-label="Volver"
+        className="group mt-6 md:mt-0 mb-6 -ml-1 p-2 w-fit rounded-full hover:bg-white/10 transition-colors duration-200"
+        aria-label={t("auth.register.back")}
       >
-        <IconBackArrow className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
+        <IconBackArrow className="w-6 h-6 text-zinc-400 group-hover:text-white transition-colors" />
       </button>
 
       {/* Header */}
       <div className="mb-7">
         <h1 className="text-4xl font-black text-white tracking-tight leading-tight mb-2">
-          Crear Cuenta
+          {t("auth.register.title")}
         </h1>
         <p className="text-zinc-400 text-base font-medium">
-          Empieza tu transformación hoy.
+          {t("auth.register.subtitle")}
         </p>
       </div>
 
@@ -209,11 +211,11 @@ function RegisterForm({ onBack }) {
 
         {/* Nombre Completo */}
         <FormInput
-          label="Nombre Completo"
+          label={t("auth.register.fullname_label")}
           icon={<IconUser className="w-4 h-4" />}
           type="text"
           name="nombre_completo"
-          placeholder="David García"
+          placeholder={t("auth.register.fullname_placeholder")}
           value={formData.nombre_completo}
           onChange={handleChange}
         />
@@ -221,11 +223,11 @@ function RegisterForm({ onBack }) {
         {/* Username */}
         <div>
           <FormInput
-            label="Nombre de Usuario"
+            label={t("auth.register.username_label")}
             icon={<span className="font-black text-sm leading-none">@</span>}
             type="text"
             name="username"
-            placeholder="david_g"
+            placeholder={t("auth.register.username_placeholder")}
             value={formData.username}
             onChange={handleChange}
             extraProps={{ autoComplete: "username" }}
@@ -234,18 +236,18 @@ function RegisterForm({ onBack }) {
             }
           />
           {usernameAvailable === false && (
-            <p className="text-xs text-red-400 mt-1 pl-1">Este nombre de usuario ya está en uso.</p>
+            <p className="text-xs text-red-400 mt-1 pl-1">{t("auth.register.username_taken")}</p>
           )}
         </div>
 
         {/* Email */}
         <div>
           <FormInput
-            label="Correo Electrónico"
+            label={t("auth.register.email_label")}
             icon={<IconEmail className="w-4 h-4" />}
             type="email"
             name="email"
-            placeholder="hola@oxyra.com"
+            placeholder={t("auth.register.email_placeholder")}
             value={formData.email}
             onChange={handleChange}
             extraProps={{ autoComplete: "email" }}
@@ -254,13 +256,13 @@ function RegisterForm({ onBack }) {
             }
           />
           {emailAvailable === false && (
-            <p className="text-xs text-red-400 mt-1 pl-1">Este correo electrónico ya está registrado.</p>
+            <p className="text-xs text-red-400 mt-1 pl-1">{t("auth.register.email_registered")}</p>
           )}
         </div>
 
         {/* Contraseña */}
         <div className="space-y-2">
-          <label className="text-xs font-bold text-zinc-500 pl-1 uppercase tracking-wider">Contraseña</label>
+          <label className="text-xs font-bold text-zinc-500 pl-1 uppercase tracking-wider">{t("auth.register.password_label")}</label>
           <div className="group bg-zinc-900/60 border border-zinc-800 focus-within:border-zinc-500 focus-within:bg-zinc-900 transition-all duration-300 rounded-xl flex items-center pl-4 pr-2 py-3.5">
             <div className="text-zinc-600 group-focus-within:text-white transition-colors duration-300 shrink-0">
               <IconLock className="w-4 h-4" />
@@ -271,7 +273,7 @@ function RegisterForm({ onBack }) {
               autoComplete="new-password"
               minLength={6}
               className="bg-transparent border-none text-white w-full ml-3 focus:outline-none placeholder-zinc-600 font-medium text-sm"
-              placeholder="••••••••"
+              placeholder={t("auth.register.password_placeholder")}
               required
               value={formData.password}
               onChange={handleChange}
@@ -317,37 +319,37 @@ function RegisterForm({ onBack }) {
           {loading ? (
             <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
           ) : (
-            "Crear Cuenta"
+            t("auth.register.submit")
           )}
         </button>
       </form>
 
       {/* Footer link */}
       <p className="mt-6 text-center text-zinc-500 text-sm font-medium">
-        ¿Ya tienes cuenta?{" "}
+        {t("auth.register.have_account")}{" "}
         <Link
           to="/login"
           className="text-white font-bold hover:underline underline-offset-4 decoration-zinc-500 transition-colors"
         >
-          Inicia Sesión
+          {t("auth.register.login")}
         </Link>
       </p>
     </div>
   );
 }
 
-// ─── Página Register ──────────────────────────────────────────────────────────
+//  Página Register 
 export default function Register() {
   const navigate = useNavigate();
 
   return (
     <>
-      {/* ─── DESKTOP ─── */}
+      {/*  DESKTOP  */}
       <DesktopAuthLayout quote="Empieza tu transformación. El camino más difícil es el primero.">
         <RegisterForm />
       </DesktopAuthLayout>
 
-      {/* ─── MOBILE ─── */}
+      {/*  MOBILE  */}
       <div className="md:hidden min-h-screen bg-[#0A0A0C] text-white flex flex-col font-sans relative overflow-hidden selection:bg-white selection:text-black">
         <div className="absolute top-[-10%] right-[-10%] w-[350px] h-[350px] bg-blue-900/15 blur-[100px] rounded-full pointer-events-none" />
         <div className="relative z-10 flex flex-col px-6 py-6 grow">

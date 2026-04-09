@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { API_URL } from "../../config/api";
+import { oxyConfirm } from "../../utils/customAlert";
 
 const LEVEL_CONFIG = {
   success: { label: 'Éxito',    dot: 'bg-emerald-500', card: 'border-emerald-500/10 hover:border-emerald-500/20', text: 'text-emerald-400', badge: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' },
@@ -52,7 +53,7 @@ export default function AdminLogs() {
   }, [autoRefresh, fetchLogs]);
 
   const handleClear = async () => {
-    if (!window.confirm('¿Limpiar TODOS los logs del sistema? Esta acción no se puede deshacer.')) return;
+    if (!(await oxyConfirm('¿Limpiar TODOS los logs del sistema? Esta acción no se puede deshacer.'))) return;
     setClearing(true);
     try {
       const r = await fetch(`${API_URL}/api/admin/logs`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });

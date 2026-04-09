@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 // AÑADIMOS IconGrip
 import { IconDotsHorizontal, IconPlay, IconEdit, IconTrash, IconGrip } from "../icons/Icons"; 
+import { useTranslation } from "react-i18next";
 
 export default function RoutineCard({ routine, onClick, onDelete, onStart, onRename, dragControls }) {
+  const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
 
-  const metaInfo = `${routine.dias?.length || 0} días • ${routine.nivel || "General"}`;
+  const levelKey = routine.nivel || "General";
+  const metaInfo = `${t("training.days", { count: routine.dias?.length || 0 })} • ${t(`training.levels.${levelKey}`, { defaultValue: levelKey === "General" ? t("training.general") : levelKey })}`;
   const isAI = routine.creada_por_ia;
 
   useEffect(() => {
@@ -41,7 +44,7 @@ export default function RoutineCard({ routine, onClick, onDelete, onStart, onRen
         
         <div className="flex-1 pr-2 flex flex-col gap-2">
             <h3 className="font-bold text-[19px] leading-tight text-slate-900 dark:text-white tracking-tight line-clamp-1">
-                 {routine.nombre_rutina || "Sin nombre"}
+                 {routine.nombre_rutina || t("training.unnamed")}
             </h3>
             
             <div className="flex items-center gap-2.5 flex-wrap">
@@ -52,7 +55,7 @@ export default function RoutineCard({ routine, onClick, onDelete, onStart, onRen
                         : 'bg-slate-50 text-slate-500 border-slate-100 dark:bg-white/5 dark:text-zinc-400 dark:border-white/5'
                     }
                 `}>
-                    {isAI ? "AI PLAN" : "MANUAL"}
+                    {isAI ? t("training.ai_plan") : t("training.manual_plan")}
                 </div>
                 <div className="h-3 w-[1px] bg-slate-200 dark:bg-white/10"></div>
                 <span className="text-[11px] font-medium text-slate-400 dark:text-zinc-500 tracking-wide uppercase">
@@ -99,11 +102,11 @@ export default function RoutineCard({ routine, onClick, onDelete, onStart, onRen
                     ">
                         <div className="p-1.5 flex flex-col gap-0.5">
                             <button onClick={(e) => handleAction(e, onRename)} className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100/80 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white">
-                                <IconEdit className="w-4 h-4 opacity-70" /> Renombrar
+                                <IconEdit className="w-4 h-4 opacity-70" /> {t("common.rename")}
                             </button>
                             <div className="h-[1px] bg-slate-100 dark:bg-white/5 mx-2 my-0.5"></div>
                             <button onClick={(e) => handleAction(e, onDelete)} className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-red-500 hover:bg-red-50/80 dark:text-red-400 dark:hover:bg-red-500/10 dark:hover:text-red-300">
-                                <IconTrash className="w-4 h-4 opacity-70" /> Eliminar
+                                <IconTrash className="w-4 h-4 opacity-70" /> {t("common.delete")}
                             </button>
                         </div>
                     </div>
@@ -123,7 +126,7 @@ export default function RoutineCard({ routine, onClick, onDelete, onStart, onRen
             dark:hover:bg-white/[0.08] dark:hover:text-blue-100
         "
       >
-        <IconPlay className="w-3.5 h-3.5 fill-current" /> INICIAR ENTRENAMIENTO
+        <IconPlay className="w-3.5 h-3.5 fill-current" /> {t("training.start_workout_button")}
       </button>
     </div>
   );

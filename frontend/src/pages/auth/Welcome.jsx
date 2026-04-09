@@ -1,30 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useGoogleLogin } from "@react-oauth/google";
-import logoWhite from "../../assets/images/oxyra-white.png";
+import { Capacitor } from "@capacitor/core";
+import { GoogleAuth } from "@codetrix-studio/capacitor-google-auth";
+import headerLogoOxyra from "../../assets/iconos/header-logo-oxyra.svg";
 import { API_URL } from "../../config/api";
 import DesktopAuthLayout from "../../components/layouts/DesktopAuthLayout";
+import { notifyWelcome } from "../../utils/notifications";
+import { oxyAlert } from "../../utils/customAlert";
 
-// ─── Slides del carrusel mobile ─────────────────────────────────────────────
-const slides = [
-  {
-    id: 1,
-    text: "Registra tus entrenamientos fácilmente, todo desde un mismo lugar.",
-    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    text: "Analiza tu progreso y rompe tus marcas personales.",
-    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    id: 3,
-    text: "Únete a la comunidad Oxyra y comparte tus logros.",
-    image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1000&auto=format&fit=crop",
-  },
-];
+//  slides will be generated inside the component to use translations 
 
-// ─── SVG Google inline ───────────────────────────────────────────────────────
+//  SVG Google inline 
 const GoogleIcon = () => (
   <svg className="w-5 h-5 absolute left-5" viewBox="0 0 24 24" aria-hidden="true">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -41,12 +29,81 @@ const EmailIcon = () => (
   </svg>
 );
 
+//  Adaptador: normaliza el payload al mismo formato sin importar el origen ─
+// Web devuelve: { email, name, picture, sub }
+// Nativo devuelve: { email, name, imageUrl (en vez de picture), id (en vez de sub) }
+function normalizeGoogleUser(userInfo) {
+  return {
+    email: userInfo.email,
+    name: userInfo.name,
+    picture: userInfo.picture ?? userInfo.imageUrl ?? null,
+    sub: userInfo.sub ?? userInfo.id ?? null,
+  };
+}
+
+//  Envía el payload normalizado al backend
+async function sendToBackend(normalizedUser) {
+  const targetUrl = `${API_URL}/api/auth/google-login`;
+  console.log("[sendToBackend] Llamando a URL exacta en POST:", targetUrl);
+  
+  const backendRes = await fetch(targetUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(normalizedUser),
+  });
+  return backendRes;
+}
+
 export default function Welcome() {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [googleAuthReady, setGoogleAuthReady] = useState(false);
   const navigate = useNavigate();
 
-  // ─── Google OAuth ──────────────────────────────────────────────────────────
-  const loginWithGoogle = useGoogleLogin({
+  const slides = [
+    {
+      id: 1,
+      text: t("auth.welcome.slides.0"),
+      image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000&auto=format&fit=crop",
+    },
+    {
+      id: 2,
+      text: t("auth.welcome.slides.1"),
+      image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1000&auto=format&fit=crop",
+    },
+    {
+      id: 3,
+      text: t("auth.welcome.slides.2"),
+      image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1000&auto=format&fit=crop",
+    },
+  ];
+
+  //  Inicialización del plugin nativo (OBLIGATORIO antes de signIn) 
+  // Sin esta llamada, GoogleSignInClient es null y la app crashea.
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      console.log("[GoogleAuth] Inicializando plugin nativo...");
+      // CLAVE: usar el Web Client ID (no el Android) para que Google genere el idToken correcto
+      GoogleAuth.initialize({
+        clientId: "347793586128-k66ji06lfekp2cc9ipd2g7tsvnht739q.apps.googleusercontent.com",
+        scopes: ["profile", "email"],
+        grantOfflineAccess: true,
+      })
+        .then(() => {
+          console.log("[GoogleAuth] Plugin inicializado correctamente.");
+          setGoogleAuthReady(true);
+        })
+        .catch((err) => {
+          console.error("[GoogleAuth] Error al inicializar el plugin:", JSON.stringify(err), err);
+        });
+    } else {
+      // En web no es necesario inicializar; el flujo es gestionado por @react-oauth/google
+      setGoogleAuthReady(true);
+    }
+  }, []);
+
+  //  Google OAuth (WEB) 
+  const loginWithGoogleWeb = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
         const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
@@ -54,34 +111,84 @@ export default function Welcome() {
         });
         const userInfo = await res.json();
 
-        const backendRes = await fetch(`${API_URL}/api/auth/google-login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: userInfo.email,
-            name: userInfo.name,
-            picture: userInfo.picture,
-            sub: userInfo.sub,
-          }),
-        });
-
+        const backendRes = await sendToBackend(normalizeGoogleUser(userInfo));
         const data = await backendRes.json();
 
         if (backendRes.ok && data.token) {
           localStorage.setItem("authToken", data.token);
+          if (data.user) {
+            localStorage.setItem("userData", JSON.stringify(data.user));
+            notifyWelcome(data.user.username || data.user.nombre_completo);
+          }
           navigate("/");
         } else {
-          console.error("Error en el login del servidor:", data.error);
-          alert("El servidor no pudo validar la cuenta de Google.");
+          console.error("Error en el login del servidor (web):", data.error);
+          await oxyAlert(t("auth.login.google_error"));
         }
       } catch (error) {
-        console.error("Error en el proceso de Google:", error);
+        console.error("Error en el proceso de Google (web):", error);
       }
     },
-    onError: () => console.log("Error en el login con Google"),
+    onError: () => console.error("Error en el OAuth de Google (web)"),
   });
 
-  // ─── Autoplay carrusel (mobile) ───────────────────────────────────────────
+  //  Google Sign-In (NATIVO Android) 
+  const loginWithGoogleNative = async () => {
+    if (!googleAuthReady) {
+      console.warn("[GoogleAuth] El plugin aún no está inicializado. Espera un momento.");
+      return;
+    }
+    try {
+      console.log("[GoogleAuth] Iniciando Google Sign-In nativo...");
+      const googleUser = await GoogleAuth.signIn();
+      console.log("[GoogleAuth] Usuario obtenido:", JSON.stringify(googleUser));
+
+      // googleUser tiene la forma:
+      // { id, name, email, imageUrl, authentication: { idToken, accessToken, ... } }
+      const normalized = normalizeGoogleUser({
+        email: googleUser.email,
+        name: googleUser.name,
+        imageUrl: googleUser.imageUrl,
+        id: googleUser.id,
+      });
+
+      const backendRes = await sendToBackend(normalized);
+      const data = await backendRes.json();
+
+      if (backendRes.ok && data.token) {
+        localStorage.setItem("authToken", data.token);
+        if (data.user) {
+          localStorage.setItem("userData", JSON.stringify(data.user));
+          notifyWelcome(data.user.username || data.user.nombre_completo);
+        }
+        navigate("/");
+      } else {
+        console.error("[GoogleAuth] Error en el login del servidor (nativo):", data.error);
+        await oxyAlert(t("auth.login.google_error"));
+      }
+    } catch (error) {
+      // Códigos de error comunes:
+      //   code 10    → Developer Error: SHA-1 no registrado en Google Cloud o clientId incorrecto
+      //   code 12500 → Sign-in failed: Play Services desactualizado o cuenta bloqueada
+      console.error(
+        "[GoogleAuth] Error en el proceso de Google Sign-In nativo:",
+        JSON.stringify(error),
+        error
+      );
+      await oxyAlert(`Google Sign-In falló.\nDetalle: ${JSON.stringify(error)}`);
+    }
+  };
+
+  //  Selector de flujo: Web vs Nativo 
+  const handleGoogleLogin = () => {
+    if (Capacitor.isNativePlatform()) {
+      loginWithGoogleNative();
+    } else {
+      loginWithGoogleWeb();
+    }
+  };
+
+  //  Autoplay carrusel (mobile)
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
@@ -89,17 +196,17 @@ export default function Welcome() {
     return () => clearInterval(timer);
   }, []);
 
-  // ─── Contenido compartido de los botones de acción ────────────────────────
-  const ActionButtons = ({ stacked = false }) => (
+  //  Contenido compartido de los botones de acción 
+  const renderActionButtons = (stacked = false) => (
     <div className={`flex flex-col gap-3 w-full ${stacked ? "" : ""}`}>
       {/* Botón Google */}
       <button
         id="welcome-google-btn"
-        onClick={() => loginWithGoogle()}
+        onClick={handleGoogleLogin}
         className="relative w-full h-14 bg-white text-black font-bold text-base rounded-full flex items-center justify-center shadow-md hover:bg-white/90 hover:scale-[1.015] active:scale-[0.98] transition-all duration-300"
       >
         <GoogleIcon />
-        <span>Regístrate con Google</span>
+        <span>{t("auth.welcome.google_signup")}</span>
       </button>
 
       {/* Botón Email */}
@@ -109,18 +216,18 @@ export default function Welcome() {
         className="relative w-full h-14 bg-transparent text-white font-bold text-base rounded-full border border-zinc-700 flex items-center justify-center hover:border-zinc-400 hover:bg-white/5 active:scale-[0.98] transition-all duration-300"
       >
         <EmailIcon />
-        <span>Registrarse con Email</span>
+        <span>{t("auth.welcome.email_signup")}</span>
       </button>
 
       {/* Enlace Login */}
       <div className="text-center mt-3">
-        <span className="text-zinc-500 font-medium text-sm">¿Tienes una cuenta? </span>
+        <span className="text-zinc-500 font-medium text-sm">{t("auth.welcome.have_account")} </span>
         <button
           id="welcome-login-link"
           onClick={() => navigate("/login")}
           className="text-white font-bold text-sm hover:underline underline-offset-4 decoration-zinc-500 transition-all duration-200"
         >
-          Iniciar sesión
+          {t("auth.welcome.login")}
         </button>
       </div>
     </div>
@@ -129,28 +236,28 @@ export default function Welcome() {
   return (
     <>
       {/* ═══════════════ VISTA DESKTOP (split-screen) ═══════════════════════ */}
-      <DesktopAuthLayout quote="Únete a la comunidad Oxyra y comparte tus logros.">
+      <DesktopAuthLayout quote={t("auth.welcome.desktop_quote")}>
         <div className="flex flex-col gap-8">
           {/* Encabezado */}
           <div>
             <h1 className="text-4xl font-black text-white leading-tight tracking-tight mb-3">
-              Bienvenido a<br />
+              {t("auth.welcome.title")}<br />
               <span className="text-white">Oxyra</span>
             </h1>
             <p className="text-zinc-400 text-base leading-relaxed">
-              Tu plataforma de entrenamiento premium. Registra, analiza y supérate cada día.
+              {t("auth.welcome.subtitle")}
             </p>
           </div>
 
           {/* Divisor */}
           <div className="flex items-center gap-4">
             <div className="h-px flex-1 bg-zinc-800" />
-            <span className="text-zinc-600 text-xs uppercase tracking-widest font-semibold">Acceder</span>
+            <span className="text-zinc-600 text-xs uppercase tracking-widest font-semibold">{t("auth.welcome.access")}</span>
             <div className="h-px flex-1 bg-zinc-800" />
           </div>
 
           {/* Botones */}
-          <ActionButtons />
+          {renderActionButtons()}
         </div>
       </DesktopAuthLayout>
 
@@ -172,8 +279,7 @@ export default function Welcome() {
         {/* Contenido mobile */}
         <div className="relative z-10 h-full flex flex-col px-6 py-12">
           <div className="flex items-center justify-center gap-3 mt-4">
-            <img src={logoWhite} alt="Oxyra Logo" className="h-10 w-auto" />
-            <h2 className="text-3xl font-bold tracking-widest uppercase">OXYRA</h2>
+            <img src={headerLogoOxyra} alt="Oxyra Logo" className="h-10 w-auto" />
           </div>
 
           <div className="flex flex-col items-center text-center mt-auto mb-6">
@@ -193,7 +299,7 @@ export default function Welcome() {
             </div>
           </div>
 
-          <ActionButtons stacked />
+          {renderActionButtons(true)}
         </div>
       </div>
     </>

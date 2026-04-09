@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { IconRotate, IconLoader, IconAlertCircle } from "../../components/icons/Icons"; 
 import { API_URL } from "../../config/api";
 import { getMuscleColor } from "../../config/ranksColors"; 
@@ -9,6 +11,7 @@ import MuscleDetailSheet from "../../components/settings/sheets/MuscleDetailShee
 import RanksInfoSheet from "../../components/settings/sheets/RanksInfoSheet";
 import PhysiqueScanSheet from "../../components/settings/sheets/PhysiqueScanSheet";
 import ModernLoader from "../../components/shared/ModernLoader";
+import { useConnection } from "../../context/ConnectionContext";
 
 // Icono de escáner personalizado para el botón
 const IconScan = ({ className }) => (
@@ -22,14 +25,16 @@ const IconScan = ({ className }) => (
 );
 
 export default function MobileStatistics() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [stats, setStats] = useState([]); 
   const [view, setView] = useState("front"); 
   const [selectedMuscle, setSelectedMuscle] = useState(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isInfoSheetOpen, setIsInfoSheetOpen] = useState(false);
   const [isScanSheetOpen, setIsScanSheetOpen] = useState(false);
+  const { reportError } = useConnection();
 
   useEffect(() => {
     fetchStats();
@@ -44,13 +49,13 @@ export default function MobileStatistics() {
       if (res.ok) {
         const data = await res.json();
         setStats(data.muscularStats || []);
-        setTimeout(() => setLoading(false), 900);
+        setTimeout(() => setLoading(false), 600);
       } else {
-        throw new Error("Error fetching stats");
+        throw new Error(t("statistics.error_fetching"));
       }
     } catch (error) {
       console.error("Error cargando stats:", error);
-      setError(true);
+      reportError();
     } 
   };
 
@@ -70,16 +75,72 @@ export default function MobileStatistics() {
     return map;
   }, [stats]);
 
-  if (loading || error) return (
+  // Tras cargar, determinamos si el usuario tiene datos musculares reales
+  const hasData = !loading && stats.length > 0;
+  const noData  = !loading && stats.length === 0;
+
+  // Mientras carga: mostramos el ModernLoader
+  if (loading) return (
     <div className="min-h-screen w-full bg-background flex items-center justify-center overflow-hidden">
-        <ModernLoader text={error ? "ERROR DE CONEXIÓN" : "SINCRONIZANDO BIOMETRÍA..."} />
+        <ModernLoader text={t("statistics.loading_biometry")} />
     </div>
   );
 
   return (
     <div className="relative w-full h-full flex flex-col bg-background overflow-hidden animate-in fade-in duration-500">
-      
-      {/* --- UNIFIED CONTROL CAPSULE --- */}
+
+      {/* --- AVATAR (siempre en fondo como base visual) --- */}
+      <div className={`absolute inset-0 flex items-center justify-center z-10 px-6 pt-10 pb-20 transition-all duration-700 ${
+        noData ? 'opacity-40 pointer-events-none' : 'opacity-100'
+      }`}>
+        <div className="absolute bottom-[12%] w-[40%] h-[15px] bg-black/10 blur-xl rounded-full pointer-events-none dark:bg-black/30" />
+        <div className="relative w-full h-full max-h-[82vh] scale-105 flex items-center justify-center transition-all duration-700 animate-in zoom-in-95 fill-mode-both origin-center">
+            {view === "front" ? (
+                <BodyFront colors={muscleColors} onMuscleClick={noData ? undefined : handleMuscleClick} />
+            ) : (
+                <BodyBack colors={muscleColors} onMuscleClick={noData ? undefined : handleMuscleClick} />
+            )}
+        </div>
+      </div>
+
+      {/* --- EMPTY STATE OVERLAY (solo si no hay datos) --- */}
+      {noData && (
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center px-8 animate-in fade-in duration-700">
+          {/* Capa frosted glass ultraligera */}
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-[6px]" />
+
+          {/* Contenido centrado */}
+          <div className="relative z-10 flex flex-col items-center text-center gap-5 w-full max-w-[260px]">
+            {/* Icono minimalista (Activity) */}
+            <div className="w-14 h-14 rounded-[1.25rem] bg-secondary/40 border border-border/50 flex items-center justify-center backdrop-blur-md mb-2 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </div>
+
+            {/* Texto principal */}
+            <div className="space-y-1.5">
+              <h2 className="text-[22px] font-black text-foreground tracking-tight uppercase">
+                {t("statistics.no_activity")}
+              </h2>
+              <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                {t("statistics.no_activity_desc")}
+              </p>
+            </div>
+
+            {/* CTA */}
+            <button
+              onClick={() => navigate("/training")}
+              className="mt-4 w-full h-12 rounded-2xl bg-foreground text-background font-black text-sm tracking-wide hover:bg-foreground/90 hover:shadow-lg active:scale-[0.97] transition-all shadow-md"
+            >
+              {t("statistics.start")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- UNIFIED CONTROL CAPSULE (solo si hay datos) --- */}
+      {hasData && (
       <div className="absolute right-6 top-6 z-30">
         <div className="flex flex-col gap-1 p-1 rounded-2xl bg-secondary/30 backdrop-blur-md border border-border/50 shadow-sm">
             
@@ -100,7 +161,7 @@ export default function MobileStatistics() {
             <button 
                 onClick={() => setIsScanSheetOpen(true)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground transition-all hover:text-blue-500 hover:bg-blue-500/10 active:scale-95 relative group"
-                title="Escaneo Corporal IA"
+                title={t("statistics.scan_title")}
             >
                 <IconScan className="w-5 h-5" />
                 {/* PRO dot indicator */}
@@ -122,21 +183,7 @@ export default function MobileStatistics() {
 
         </div>
       </div>
-
-      {/* --- MAIN CHARACTER STAGE --- */}
-      <div className="absolute inset-0 flex items-center justify-center z-10 px-6 pt-10 pb-20">
-        
-        {/* Sombra de Contacto Sutil */}
-        <div className="absolute bottom-[12%] w-[40%] h-[15px] bg-black/10 blur-xl rounded-full pointer-events-none dark:bg-black/30" />
-
-        <div className="relative w-full h-full max-h-[82vh] scale-105 flex items-center justify-center transition-all duration-700 animate-in zoom-in-95 fill-mode-both origin-center">
-            {view === "front" ? (
-                <BodyFront colors={muscleColors} onMuscleClick={handleMuscleClick} />
-            ) : (
-                <BodyBack colors={muscleColors} onMuscleClick={handleMuscleClick} />
-            )}
-        </div>
-      </div>
+      )}
 
 
       {/* --- SHEETS & MODALS --- */}

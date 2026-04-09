@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API_URL } from "../../config/api";
+import { oxyConfirm } from "../../utils/customAlert";
 
 const VALID_MUSCLES = [
   'Pecho','Espalda Alta','Espalda Media','Espalda Baja','Hombro',
@@ -91,7 +92,7 @@ export default function AdminExercises() {
   };
 
   const handleDelete = async (ex) => {
-    if (!window.confirm(`¿Eliminar "${ex.nombre}" del catálogo? Esto puede afectar rutinas existentes.`)) return;
+    if (!(await oxyConfirm(`¿Eliminar "${ex.nombre}" del catálogo? Esto puede afectar rutinas existentes.`))) return;
     setActionLoading(true);
     try {
       const r = await fetch(`${API_URL}/api/admin/exercises/${ex.idEjercicio}`, {

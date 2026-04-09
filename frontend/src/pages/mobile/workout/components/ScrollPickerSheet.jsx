@@ -1,8 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export default function ScrollPickerSheet({ open, onOpenChange, title, initialValue, options, onSave, suffix = "" }) {
+  const { t } = useTranslation();
   const scrollRef = useRef(null);
   const selectedValueRef = useRef(initialValue);
   const [activeItem, setActiveItem] = useState(initialValue);
@@ -108,7 +110,7 @@ export default function ScrollPickerSheet({ open, onOpenChange, title, initialVa
                 onClick={handleConfirm} 
                 className="w-full h-14 font-bold rounded-2xl text-lg bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 active:scale-95 transition-transform"
             >
-                Confirmar
+                {t("common.confirm")}
             </Button>
         </div>
 

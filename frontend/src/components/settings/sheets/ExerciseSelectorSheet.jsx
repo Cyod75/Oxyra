@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { IconCheck, IconLoader, IconPlus } from "../../icons/Icons"; // Usa tus iconos
 import { API_URL } from "../../../config/api"; // Asegúrate de tener esto configurado
 
 export default function ExerciseSelectorSheet({ open, onOpenChange, onExercisesSelected }) {
+  const { t } = useTranslation();
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -59,11 +61,11 @@ export default function ExerciseSelectorSheet({ open, onOpenChange, onExercisesS
       <SheetContent side="bottom" className="h-[90%] rounded-t-[32px] bg-background border-t border-border px-0 flex flex-col">
         
         <SheetHeader className="px-6 mb-4 mt-4">
-          <SheetTitle>Añadir Ejercicios</SheetTitle>
+          <SheetTitle>{t("training.exercise_selector.title")}</SheetTitle>
           {/* Buscador */}
           <input 
             type="text"
-            placeholder="Buscar (ej: Press Banca, Pecho...)"
+            placeholder={t("training.exercise_selector.search_placeholder")}
             className="w-full bg-secondary/30 border border-border/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary/50 transition-colors"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -88,8 +90,8 @@ export default function ExerciseSelectorSheet({ open, onOpenChange, onExercisesS
                             }`}
                         >
                             <div>
-                                <h4 className={`font-bold text-sm ${isSelected ? 'text-primary' : 'text-foreground'}`}>{ex.nombre}</h4>
-                                <span className="text-xs text-muted-foreground">{ex.grupo_muscular}</span>
+                                <h4 className={`font-bold text-sm ${isSelected ? 'text-primary' : 'text-foreground'}`}>{t(`exercises.${ex.nombre}`, { defaultValue: ex.nombre })}</h4>
+                                <span className="text-xs text-muted-foreground">{t(`muscles.${ex.grupo_muscular}`, { defaultValue: ex.grupo_muscular })}</span>
                             </div>
                             {isSelected ? (
                                 <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
@@ -111,7 +113,7 @@ export default function ExerciseSelectorSheet({ open, onOpenChange, onExercisesS
                 onClick={handleConfirm}
                 disabled={selectedIds.length === 0}
             >
-                Añadir ({selectedIds.length})
+                {t("training.exercise_selector.add_count", { count: selectedIds.length })}
             </Button>
         </div>
 

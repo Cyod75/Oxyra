@@ -7,16 +7,22 @@ import DesktopView from "./views/DesktopView";
 // --- Components Shared ---
 import ProtectedRoute from "./components/shared/ProtectedRoute";
 
-// --- Auth Pages (NUEVAS) ---
+// --- Auth Pages ---
 import Welcome from "./pages/auth/Welcome";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import VerifyCode from "./pages/auth/VerifyCode";
 import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
+
+// --- Onboarding ---
+import OnboardingPage from "./pages/onboarding/OnboardingPage";
 
 import RoutineDetail from "./pages/mobile/workout/RoutineDetail";
 import WorkoutSessionPage from "./pages/mobile/workout/WorkoutSessionPage";
+import PersonalDataPage from "./pages/mobile/PersonalDataPage";
+import EditProfilePage from "./pages/mobile/EditProfilePage";
 
 // --- Mobile Pages ---
 import MobileTraining from "./pages/mobile/MobileTraining";
@@ -42,13 +48,18 @@ function App() {
   return (
     <Routes>
       {/* --- RUTAS PÚBLICAS --- */}
-          {/* Si ya está logueado, no debería ver el Welcome.*/}
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/verify-code" element={<VerifyCode />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+
+      {/* --- RUTA ONBOARDING (protegida: requiere login, solo si NO completado) --- */}
+      <Route element={<ProtectedRoute adminOnly={false} onboardingRoute={true} />}>
+        <Route path="/onboarding" element={<OnboardingPage />} />
+      </Route>
 
       {/* --- RUTAS PROTEGIDAS ADMIN --- */}
       <Route element={<ProtectedRoute adminOnly={true} />}>
@@ -63,14 +74,9 @@ function App() {
       {/* --- RUTAS PROTEGIDAS USUARIO --- */}
       <Route element={<ProtectedRoute adminOnly={false} />}>
         <Route path="/" element={
-          <>
-            <div className="md:hidden h-screen flex flex-col bg-base-100 text-base-content transition-colors duration-200">
-              <MobileView />
-            </div>
-            <div className="hidden md:block">
-              <DesktopView />
-            </div>
-          </>
+          <DesktopView>
+            <MobileView />
+          </DesktopView>
         }>
           <Route index element={<MobileTraining />} />
           <Route path="products" element={<MobileProducts />} />
@@ -81,14 +87,13 @@ function App() {
           <Route path="profile/:username/followers" element={<UserConnectionsPage type="followers" />} />
           <Route path="profile/:username/following" element={<UserConnectionsPage type="following" />} />
           <Route path="settings" element={<MobileSettings />} />
-        </Route>
 
-        {/* Rutas fuera del layout principal si es necesario, pero manteniendo la estructura mobile-first */}
-        <Route path="routine/:id" element={<RoutineDetail />} />
-        <Route
-          path="/workout/session/:routineId"
-          element={<WorkoutSessionPage />}
-        />
+          {/* Rutas que antes estaban fuera del layout principal */}
+          <Route path="routine/:id" element={<RoutineDetail />} />
+          <Route path="workout/session/:routineId" element={<WorkoutSessionPage />} />
+          <Route path="settings/personal-data" element={<PersonalDataPage />} />
+          <Route path="profile/edit" element={<EditProfilePage />} />
+        </Route>
       </Route>
 
       {/* Redirección por defecto */}

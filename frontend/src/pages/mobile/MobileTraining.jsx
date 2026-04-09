@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Reorder, useDragControls } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   IconPlus,
   IconSparkles,
@@ -10,14 +11,15 @@ import {
   IconX,
 } from "../../components/icons/Icons";
 import RoutineCard from "../../components/settings/RoutineCard";
-import CreateRoutineSheet from "../../components/settings/sheets/CreateRoutineSheet";
+import AIRoutineWizardSheet from "../../components/settings/sheets/AIRoutineWizardSheet";
 import CreateManualRoutineSheet from "../../components/settings/sheets/CreateManualRoutineSheet";
 import SubscriptionSheet from "../../components/settings/sheets/SubscriptionSheet";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../../config/api";
 import { useSubscription } from "../../hooks/useSubscription";
-// IMPORTAR MODERN LOADER
 import ModernLoader from "../../components/shared/ModernLoader";
+import { useConnection } from "../../context/ConnectionContext";
+import { oxyAlert } from "../../utils/customAlert";
 
 // --- COMPONENTE SORTABLE (Drag & Drop Individual) ---
 const SortableItem = ({ item, onDelete, onRename, onStart, onClick }) => {
@@ -39,12 +41,13 @@ const SortableItem = ({ item, onDelete, onRename, onStart, onClick }) => {
       dragControls={controls}
       // CORRECCIÓN CLAVE: Eliminado 'transition-transform' y 'active:z-10'
       // 'transition-transform' causaba el conflicto con las físicas de Framer
-      className="relative z-0 list-none mb-4" 
+      className="relative z-0 list-none mb-4 rounded-[26px]" 
       whileDrag={{ 
         scale: 1.05, 
         zIndex: 100,
         // Añadimos sombra para dar sensación de elevación y evitar que visualmente se "pegue"
-        boxShadow: "0px 10px 20px rgba(0,0,0,0.2)" 
+        // Redujimos la opacidad en light mode para que la sombra sea más sutil
+        boxShadow: "0px 12px 24px -10px rgba(0,0,0,0.15)" 
       }}
       transition={{
         // Ajuste de transición para que el reordenamiento de las OTRAS cartas sea suave
@@ -66,6 +69,7 @@ const SortableItem = ({ item, onDelete, onRename, onStart, onClick }) => {
 };
 
 export default function MobileTraining() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Clave para LocalStorage
@@ -86,7 +90,7 @@ export default function MobileTraining() {
   // Datos
   const [routines, setRoutines] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false); // 1. Nuevo estado de error
+  const { reportError } = useConnection();
 
   const {
     isPro,
@@ -145,8 +149,8 @@ export default function MobileTraining() {
 
     } catch (error) {
       console.error("Error cargando rutinas:", error);
-      // 3. ERROR: Activamos modo error
-      setError(true);
+      // Notificamos al sistema global de conexión
+      reportError();
     }
   };
 
@@ -230,7 +234,7 @@ export default function MobileTraining() {
         );
         setRenameModalOpen(false);
       } else {
-        alert("Error al actualizar nombre");
+        await oxyAlert(t("training.rename_error"));
       }
     } catch (error) {
       console.error(error);
@@ -244,11 +248,11 @@ export default function MobileTraining() {
     isPro ? setIsAiSheetOpen(true) : setShowSubscription(true);
   };
 
-  // 4. BLOQUEO DE SEGURIDAD
-  if (loading || error) {
+  // BLOQUEO DE SEGURIDAD
+  if (loading) {
       return (
           <div className="min-h-screen bg-background flex items-center justify-center">
-              <ModernLoader text={error ? "ERROR DE CONEXIÓN" : "PREPARANDO ENTRENAMIENTOS..."} />
+              <ModernLoader text={t("training.preparing")} />
           </div>
       );
   }
@@ -258,10 +262,10 @@ export default function MobileTraining() {
       {/* 1. HEADER */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold mb-1 text-foreground tracking-tight pl-1">
-          Entrenar
+          {t("training.title")}
         </h1>
         <p className="text-muted-foreground mb-6 text-sm font-medium opacity-70 pl-1">
-          Empieza tu próxima sesión
+          {t("training.subtitle")}
         </p>
 
         <div className="grid grid-cols-2 gap-4">
@@ -276,11 +280,12 @@ export default function MobileTraining() {
             
             <div className="relative z-10">
               <span className="block text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1 opacity-80">
-                {isPro ? "IA Generativa" : "PRO Feature"}
+                {isPro ? t("training.generative_ai") : t("training.pro_feature")}
               </span>
-              <span className="block font-bold text-foreground text-lg leading-none tracking-tight">
-                Crear con <br /> Gemini
-              </span>
+              <span 
+                className="block font-bold text-foreground text-lg leading-none tracking-tight"
+                dangerouslySetInnerHTML={{ __html: t("training.create_gemini") }}
+              />
             </div>
           </button>
           <button
@@ -292,11 +297,12 @@ export default function MobileTraining() {
             </div>
             <div>
               <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 opacity-70">
-                Manual
+                {t("training.manual")}
               </span>
-              <span className="block font-bold text-foreground/90 text-lg leading-none tracking-tight">
-                Crear Rutina <br /> Vacía
-              </span>
+              <span 
+                className="block font-bold text-foreground/90 text-lg leading-none tracking-tight"
+                dangerouslySetInnerHTML={{ __html: t("training.create_empty") }}
+              />
             </div>
           </button>
         </div>
@@ -309,7 +315,7 @@ export default function MobileTraining() {
           onClick={() => setIsRoutinesExpanded(!isRoutinesExpanded)}
         >
           <h2 className="text-xl font-bold text-foreground tracking-tight">
-            Mis Rutinas
+            {t("training.my_routines")}
           </h2>
           <div className=" rounded-md hover:bg-secondary/20 transition-colors text-muted-foreground group-hover:text-foreground">
             {isRoutinesExpanded ? (
@@ -352,7 +358,7 @@ export default function MobileTraining() {
             >
                 <IconPlus className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-white transition-colors" />
                 <span className="text-sm font-semibold text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-white transition-colors">
-                Añadir entreno
+                {t("training.add_workout")}
                 </span>
             </button>
         </div>
@@ -368,10 +374,10 @@ export default function MobileTraining() {
           <div className="relative w-full max-w-[320px] bg-[#121212] border border-white/10 rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center gap-6 animate-in zoom-in-95 fade-in slide-in-from-bottom-4 duration-200">
             <div className="w-full text-center space-y-1">
               <h3 className="text-lg font-bold text-white tracking-tight">
-                Renombrar Rutina
+                {t("training.rename_title")}
               </h3>
               <p className="text-xs text-zinc-500 font-medium">
-                Elige un nombre corto y descriptivo
+                {t("training.rename_desc")}
               </p>
             </div>
             <div className="w-full relative group">
@@ -381,7 +387,7 @@ export default function MobileTraining() {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 className="w-full bg-[#1c1c1e] text-center border border-white/5 focus:border-blue-500/50 rounded-2xl px-4 py-4 text-white font-bold text-lg placeholder:text-zinc-600 outline-none transition-all duration-300 shadow-inner"
-                placeholder="Ej: Pecho y Tríceps"
+                placeholder={t("training.rename_placeholder")}
                 onKeyDown={(e) => e.key === "Enter" && handleSaveRename()}
               />
             </div>
@@ -390,7 +396,7 @@ export default function MobileTraining() {
                 onClick={() => setRenameModalOpen(false)}
                 className="flex-1 py-3.5 rounded-xl font-bold text-sm text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
               >
-                Cancelar
+                {t("training.cancel")}
               </button>
               <button
                 onClick={handleSaveRename}
@@ -400,7 +406,7 @@ export default function MobileTraining() {
                 {renamingLoading ? (
                   <IconLoader className="animate-spin w-4 h-4" />
                 ) : (
-                  "Guardar"
+                  t("training.save")
                 )}
               </button>
             </div>
@@ -409,10 +415,11 @@ export default function MobileTraining() {
       )}
 
       {/* Sheets */}
-      <CreateRoutineSheet
+      <AIRoutineWizardSheet
         open={isAiSheetOpen}
         onOpenChange={setIsAiSheetOpen}
         onRoutineCreated={handleNewRoutine}
+        isPro={isPro}
       />
       <CreateManualRoutineSheet
         open={isManualSheetOpen}

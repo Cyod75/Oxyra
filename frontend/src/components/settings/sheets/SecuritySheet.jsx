@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { useChangePassword } from "../../../hooks/useChangePassword"; // Ajusta 
 import { IconEye, IconEyeOff, IconCheckCircle, IconAlertTriangle } from "../../icons/Icons"; // Ajusta ruta
 
 export default function SecuritySheet({ open, onOpenChange }) {
+  const { t } = useTranslation();
   const { 
     passForm, setPassForm, showPass, toggleShow, loading, status, submitPasswordChange 
   } = useChangePassword(() => onOpenChange(false));
@@ -15,18 +17,18 @@ export default function SecuritySheet({ open, onOpenChange }) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-auto rounded-t-2xl px-5">
         <SheetHeader className="mb-6 mt-4">
-          <SheetTitle>Cambiar Contraseña</SheetTitle>
-          <SheetDescription>Seguridad de la cuenta.</SheetDescription>
+          <SheetTitle>{t("settings.security_sheet.title")}</SheetTitle>
+          <SheetDescription>{t("settings.security_sheet.description")}</SheetDescription>
         </SheetHeader>
         <div className="space-y-4 pb-10">
-          <PasswordField label="Actual" value={passForm.current} isVisible={showPass.current} onChange={(v) => setPassForm({...passForm, current: v})} onToggle={() => toggleShow('current')} />
-          <PasswordField label="Nueva" value={passForm.new} isVisible={showPass.new} onChange={(v) => setPassForm({...passForm, new: v})} onToggle={() => toggleShow('new')} />
-          <PasswordField label="Confirmar" value={passForm.confirm} isVisible={showPass.confirm} onChange={(v) => setPassForm({...passForm, confirm: v})} onToggle={() => toggleShow('confirm')} />
+          <PasswordField label={t("settings.security_sheet.current_label")} value={passForm.current} isVisible={showPass.current} onChange={(v) => setPassForm({...passForm, current: v})} onToggle={() => toggleShow('current')} />
+          <PasswordField label={t("settings.security_sheet.new_label")} value={passForm.new} isVisible={showPass.new} onChange={(v) => setPassForm({...passForm, new: v})} onToggle={() => toggleShow('new')} />
+          <PasswordField label={t("settings.security_sheet.confirm_label")} value={passForm.confirm} isVisible={showPass.confirm} onChange={(v) => setPassForm({...passForm, confirm: v})} onToggle={() => toggleShow('confirm')} />
           
           <StatusAlert status={status} />
           
           <Button className="w-full mt-2" onClick={submitPasswordChange} disabled={loading}>
-            {loading ? "Actualizando..." : "Actualizar"}
+            {loading ? t("settings.security_sheet.updating") : t("settings.security_sheet.update")}
           </Button>
         </div>
       </SheetContent>

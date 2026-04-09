@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { IconBackArrow, IconLock, IconEye, IconEyeOff, IconCheck } from "../../components/icons/Icons";
 import { API_URL } from '../../config/api';
+import { oxyAlert } from "../../utils/customAlert";
 
 const FormInput = ({ label, icon, type, name, placeholder, value, onChange, extraProps = {}, rightElement = null }) => (
     <div className="space-y-1.5">
@@ -30,6 +32,7 @@ const FormInput = ({ label, icon, type, name, placeholder, value, onChange, extr
 );
 
 export default function ResetPassword() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { email, code } = location.state || {};
@@ -68,11 +71,11 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-        setError("Las contraseñas no coinciden");
+        setError(t("auth.reset_password.error_mismatch"));
         return;
     }
     if (passwordStrength < 2) { // Require at least Medium
-         setError("La contraseña es demasiado débil");
+         setError(t("auth.reset_password.error_weak"));
          return;
     }
 
@@ -89,12 +92,12 @@ export default function ResetPassword() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al restablecer contraseña");
+        throw new Error(data.error || t("auth.reset_password.error_resetting"));
       }
       
       // Success
       setError("");
-      alert("Contraseña restablecida correctamente. Inicia sesión.");
+      await oxyAlert(t("auth.reset_password.success_message"));
       navigate("/login");
 
     } catch (err) {
@@ -121,8 +124,8 @@ export default function ResetPassword() {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">Nueva Contraseña</h1>
-          <p className="text-zinc-400 text-base font-medium">Establece una contraseña segura para tu cuenta.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">{t("auth.reset_password.title")}</h1>
+          <p className="text-zinc-400 text-base font-medium">{t("auth.reset_password.subtitle")}</p>
         </div>
 
         {error && (
@@ -136,7 +139,7 @@ export default function ResetPassword() {
             
             <div className="space-y-2">
                 <FormInput 
-                    label="Nueva Contraseña"
+                    label={t("auth.reset_password.new_password_label")}
                     icon={<IconLock className="w-5 h-5" />}
                     type={showPassword ? "text" : "password"}
                     name="password"
@@ -164,13 +167,13 @@ export default function ResetPassword() {
                 )}
                  {password.length > 0 && (
                     <p className="text-[10px] text-zinc-500 px-1 text-right">
-                        {passwordStrength < 2 ? "Débil" : passwordStrength < 4 ? "Media" : "Fuerte"}
+                        {passwordStrength < 2 ? t("auth.reset_password.strength_weak") : passwordStrength < 4 ? t("auth.reset_password.strength_medium") : t("auth.reset_password.strength_strong")}
                     </p>
                 )}
             </div>
 
             <FormInput 
-                label="Confirmar Contraseña"
+                label={t("auth.reset_password.confirm_password_label")}
                 icon={<IconLock className="w-5 h-5" />}
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
@@ -195,7 +198,7 @@ export default function ResetPassword() {
             >
                 {loading ? (
                     <div className="w-6 h-6 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                ) : "Restablecer Contraseña"}
+                ) : t("auth.reset_password.submit")}
             </button>
 
         </form>

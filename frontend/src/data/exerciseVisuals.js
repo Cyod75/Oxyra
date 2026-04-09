@@ -16,9 +16,9 @@ const GITHUB_BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/
  * Las claves están en minúsculas y sin tildes para facilitar la búsqueda fuzzy.
  */
 const exerciseVisualsMap = {
-  // ═══════════════════════════════════════════
+  
   // PECHO (Chest)
-  // ═══════════════════════════════════════════
+  
   "press banca": `${GITHUB_BASE}/Barbell_Bench_Press_-_Medium_Grip/`,
   "press banca con barra": `${GITHUB_BASE}/Barbell_Bench_Press_-_Medium_Grip/`,
   "press banca con mancuernas": `${GITHUB_BASE}/Dumbbell_Bench_Press/`,
@@ -33,9 +33,9 @@ const exerciseVisualsMap = {
   "cruces en polea": `${GITHUB_BASE}/Cable_Crossover/`,
   "press en maquina": `${GITHUB_BASE}/Leverage_Chest_Press/`,
 
-  // ═══════════════════════════════════════════
+  
   // ESPALDA (Back)
-  // ═══════════════════════════════════════════
+  
   "dominadas": `${GITHUB_BASE}/Pullups/`,
   "dominadas con agarre ancho": `${GITHUB_BASE}/Wide-Grip_Pulldown_Behind_The_Neck/`,
   "jalon al pecho": `${GITHUB_BASE}/Wide-Grip_Lat_Pulldown/`,
@@ -51,9 +51,9 @@ const exerciseVisualsMap = {
   "pullover": `${GITHUB_BASE}/Straight-Arm_Dumbbell_Pullover/`,
   "remo en t": `${GITHUB_BASE}/Bent_Over_Two-Arm_Long_Bar_Row/`,
 
-  // ═══════════════════════════════════════════
+  
   // PIERNAS (Legs)
-  // ═══════════════════════════════════════════
+  
   "sentadilla": `${GITHUB_BASE}/Barbell_Full_Squat/`,
   "sentadilla con barra": `${GITHUB_BASE}/Barbell_Full_Squat/`,
   "sentadilla frontal": `${GITHUB_BASE}/Front_Barbell_Squat/`,
@@ -76,9 +76,9 @@ const exerciseVisualsMap = {
   "elevacion de pantorrilla": `${GITHUB_BASE}/Standing_Calf_Raises/`,
   "buenos dias": `${GITHUB_BASE}/Good_Morning/`,
 
-  // ═══════════════════════════════════════════
+  
   // HOMBROS (Shoulders)
-  // ═══════════════════════════════════════════
+  
   "press militar": `${GITHUB_BASE}/Standing_Military_Press/`,
   "press militar con barra": `${GITHUB_BASE}/Standing_Military_Press/`,
   "press militar con mancuernas": `${GITHUB_BASE}/Dumbbell_Shoulder_Press/`,
@@ -93,9 +93,9 @@ const exerciseVisualsMap = {
   "encogimientos con barra": `${GITHUB_BASE}/Barbell_Shrug/`,
   "encogimientos": `${GITHUB_BASE}/Barbell_Shrug/`,
 
-  // ═══════════════════════════════════════════
+  
   // BRAZOS - BÍCEPS (Biceps)
-  // ═══════════════════════════════════════════
+  
   "curl de biceps con barra": `${GITHUB_BASE}/Barbell_Curl/`,
   "curl con barra": `${GITHUB_BASE}/Barbell_Curl/`,
   "curl de biceps con mancuernas": `${GITHUB_BASE}/Dumbbell_Bicep_Curl/`,
@@ -107,9 +107,9 @@ const exerciseVisualsMap = {
   "curl en polea": `${GITHUB_BASE}/Cable_Hammer_Curls_-_Rope_Attachment/`,
   "curl inclinado con mancuernas": `${GITHUB_BASE}/Incline_Dumbbell_Curl/`,
 
-  // ═══════════════════════════════════════════
+  
   // BRAZOS - TRÍCEPS (Triceps)
-  // ═══════════════════════════════════════════
+  
   "extension de triceps en polea": `${GITHUB_BASE}/Triceps_Pushdown_-_Rope_Attachment/`,
   "extension de triceps": `${GITHUB_BASE}/Triceps_Pushdown_-_Rope_Attachment/`,
   "press frances": `${GITHUB_BASE}/EZ-Bar_Skullcrusher/`,
@@ -119,9 +119,9 @@ const exerciseVisualsMap = {
   "extension de triceps con mancuerna": `${GITHUB_BASE}/Dumbbell_One-Arm_Triceps_Extension/`,
   "press cerrado": `${GITHUB_BASE}/Close-Grip_Barbell_Bench_Press/`,
 
-  // ═══════════════════════════════════════════
+  
   // ABDOMINALES (Core)
-  // ═══════════════════════════════════════════
+  
   "crunch": `${GITHUB_BASE}/Crunches/`,
   "crunch abdominal": `${GITHUB_BASE}/Crunches/`,
   "abdominales": `${GITHUB_BASE}/Crunches/`,
@@ -132,24 +132,24 @@ const exerciseVisualsMap = {
   "russian twist": `${GITHUB_BASE}/Russian_Twist/`,
   "rueda abdominal": `${GITHUB_BASE}/Ab_Roller/`,
 
-  // ═══════════════════════════════════════════
+  
   // GLÚTEOS (Glutes)
-  // ═══════════════════════════════════════════
+  
   "patada de gluteo": `${GITHUB_BASE}/Glute_Kickback/`,
   "patada de gluteo en polea": `${GITHUB_BASE}/Glute_Kickback/`,
   "puente de gluteos": `${GITHUB_BASE}/Barbell_Hip_Thrust/`,
 
-  // ═══════════════════════════════════════════
+  
   // CUERPO COMPLETO / FUNCIONAL
-  // ═══════════════════════════════════════════
+  
   "clean and press": `${GITHUB_BASE}/Clean_and_Press/`,
   "swing con kettlebell": `${GITHUB_BASE}/Kettlebell_Sumo_Deadlift_High_Pull/`,
   "burpees": `${GITHUB_BASE}/Burpee/`,
 };
 
-// ═══════════════════════════════════════════
+
 // NORMALIZACIÓN Y BÚSQUEDA FUZZY
-// ═══════════════════════════════════════════
+
 
 /**
  * Normaliza un string removiendo tildes, convirtiendo a minúsculas

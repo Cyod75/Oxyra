@@ -1,34 +1,27 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useTheme } from "../../context/ThemeContext";
 import { IconSettings, IconSearch } from "../icons/Icons";
-
-import logoBlack from "../../assets/images/oxyra-black.png";
-import logoWhite from "../../assets/images/oxyra-white.png";
+import OxyraLogo from "../shared/OxyraLogo";
 
 export default function MobileHeader() {
-  const { isDark } = useTheme();
   const location = useLocation();
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 pt-[env(safe-area-inset-top)] pointer-events-none">
-      <div className="pointer-events-auto bg-background/80 backdrop-blur-2xl border-b border-border/50 shadow-sm h-14">
+    <header
+      className="fixed top-0 left-0 w-full z-50 pointer-events-none bg-background/80 backdrop-blur-2xl border-b border-border/50 shadow-sm"
+      style={{ paddingTop: 'var(--safe-area-top)' }}
+    >
+      <div className="pointer-events-auto h-14">
         <div className="flex items-center justify-between px-4 h-full text-foreground max-w-screen-xl mx-auto">
-          {/* IZQUIERDA: Logo */}
+
+          {/* IZQUIERDA: Logo SVG */}
           <Link
             to="/"
-            className="flex items-center gap-3 select-none hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+            className="flex items-center select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg
+                       text-foreground/75 hover:text-foreground transition-colors duration-200"
             aria-label="Ir al inicio"
           >
-            <img
-              src={isDark ? logoWhite : logoBlack}
-              alt="Oxyra logo"
-              className="w-8 h-8 object-contain"
-              onError={(e) => {
-                e.target.style.display = "none";
-              }}
-            />
-            <span className="text-lg font-bold tracking-tight">Oxyra</span>
+            <OxyraLogo className="h-[22px] w-auto" />
           </Link>
 
           {/* DERECHA: Acciones (Buscar + Ajustes) */}
@@ -52,9 +45,9 @@ export default function MobileHeader() {
               <IconSettings className="w-5 h-5" />
             </Link>
           </nav>
+
         </div>
       </div>
     </header>
   );
 }
-

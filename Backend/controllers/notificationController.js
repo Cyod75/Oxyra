@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // DATOS REALES
-const LOGO_URL = "https://res.cloudinary.com/duxvze8we/image/upload/v1769369172/logo-oxyra_q8lzua.png"; 
+const LOGO_URL = "https://res.cloudinary.com/duxvze8we/image/upload/v1775152308/oxyra-white_k4ttyc.png"; 
 const APP_URL = "https://jordi.informaticamajada.es/";
 
 // 2. FUNCIÓN DE ENVÍO
@@ -133,7 +133,7 @@ exports.toggleNotifications = async (req, res) => {
                 `Hola <b>${u[0].nombre_completo}</b>,<br><br>
                 Has activado correctamente las alertas de Oxyra. A partir de ahora, te mantendremos informado sobre:<br><br>
                 • Nuevos récords personales<br>
-                • Actualizaciones de tu rango Symmetry<br>
+                • Actualizaciones de tu rango Oxyra<br>
                 • Novedades de la comunidad<br><br>
                 Estamos encantados de acompañarte en tu progreso.`
             );

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { IconBackArrow, IconCheck } from "../../components/icons/Icons";
 import { API_URL } from '../../config/api';
 
 export default function VerifyCode() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
@@ -22,7 +24,7 @@ export default function VerifyCode() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (code.length !== 6) {
-        setError("El código debe tener 6 dígitos");
+        setError(t("auth.verify_code.error_length"));
         return;
     }
 
@@ -39,7 +41,7 @@ export default function VerifyCode() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al verificar código");
+        throw new Error(data.error || t("auth.verify_code.error_verifying"));
       }
       
       setSuccess(true);
@@ -71,9 +73,9 @@ export default function VerifyCode() {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">Verificar Código</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">{t("auth.verify_code.title")}</h1>
           <p className="text-zinc-400 text-base font-medium">
-            Hemos enviado un código a <span className="text-white font-bold">{email}</span>.
+            {t("auth.verify_code.subtitle")} <span className="text-white font-bold">{email}</span>.
           </p>
         </div>
 
@@ -87,14 +89,14 @@ export default function VerifyCode() {
          {success && (
           <div className="bg-green-500/10 border border-green-500/20 text-green-200 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-3">
              <IconCheck className="w-5 h-5 text-green-500" />
-             Código correcto.
+             {t("auth.verify_code.success_message")}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             
             <div className="space-y-1.5">
-                <label className="text-xs font-bold text-zinc-500 pl-1 uppercase tracking-wider">CÓDIGO DE 6 DÍGITOS</label>
+                <label className="text-xs font-bold text-zinc-500 pl-1 uppercase tracking-wider">{t("auth.verify_code.code_label")}</label>
                 <div className="bg-zinc-900/50 border border-zinc-800 focus-within:border-zinc-500 focus-within:bg-zinc-900 transition-all duration-300 rounded-2xl flex items-center px-4 py-3.5">
                     <input 
                         type="text" 
@@ -114,7 +116,7 @@ export default function VerifyCode() {
             >
                 {loading ? (
                     <div className="w-6 h-6 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                ) : "Verificar"}
+                ) : t("auth.verify_code.verify")}
             </button>
 
         </form>

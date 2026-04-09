@@ -8,9 +8,9 @@ exports.getProfile = async (req, res) => {
         const userId = req.user.id;
 
         // 1. Datos básicos del usuario
-        // CORRECCIÓN: Añadidos peso_kg, estatura_cm y genero a la selección
+        // CORRECCIÓN: Añadidos peso_kg, estatura_cm, genero y email a la selección
         const [user] = await db.query(
-            "SELECT idUsuario, username, nombre_completo, foto_perfil, biografia, rango_global, es_pro, es_privada, peso_kg, estatura_cm, genero FROM usuarios WHERE idUsuario = ?", 
+            "SELECT idUsuario, username, email, nombre_completo, foto_perfil, biografia, rango_global, es_pro, es_privada, peso_kg, estatura_cm, genero FROM usuarios WHERE idUsuario = ?", 
             [userId]
         );
         
@@ -24,7 +24,7 @@ exports.getProfile = async (req, res) => {
                 (SELECT COUNT(*) FROM historial_workouts WHERE usuario_id = ?) as entrenos
         `, [userId, userId, userId]);
 
-        // 3. Stats Musculares (Symmetry)
+        // 3. Stats Musculares (Oxyra)
         const [muscularStats] = await db.query(
             "SELECT grupo_muscular, rango_actual, fuerza_teorica_max FROM stats_musculares WHERE usuario_id = ?",
             [userId]
@@ -44,7 +44,7 @@ exports.getProfile = async (req, res) => {
 
 // ACTUALIZAR PERFIL
 exports.updateProfile = async (req, res) => {
-    const { nombre_completo, biografia, peso_kg, estatura_cm, genero, es_privada } = req.body;
+    const { nombre_completo, username, biografia, peso_kg, estatura_cm, genero, es_privada } = req.body;
     let foto_perfil_url;
 
     try {
@@ -60,14 +60,17 @@ exports.updateProfile = async (req, res) => {
 
         await db.query(
             `UPDATE usuarios 
-             SET nombre_completo = ?, biografia = ?, foto_perfil = ?, peso_kg = ?, estatura_cm = ?, genero = ?, es_privada = ? 
+             SET nombre_completo = ?, username = ?, biografia = ?, foto_perfil = ?, peso_kg = ?, estatura_cm = ?, genero = ?, es_privada = ? 
              WHERE idUsuario = ?`,
-            [nombre_completo, biografia, foto_perfil_url, peso_kg || null, estatura_cm || null, genero || null, isPrivate, req.user.id]
+            [nombre_completo, username, biografia, foto_perfil_url, peso_kg || null, estatura_cm || null, genero || null, isPrivate, req.user.id]
         );
 
         res.json({ message: "Perfil actualizado", foto_perfil: foto_perfil_url });
     } catch (err) {
         console.error(err);
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: "El nombre de usuario ya está en uso." });
+        }
         res.status(500).json({ error: err.message });
     }
 };
@@ -428,5 +431,21 @@ exports.cancelPro = async (req, res) => {
         res.json({ message: "Suscripción cancelada correctamente" });
     } catch (err) {
         res.status(500).json({ error: "Error al cancelar" });
+    }
+};
+
+// COMPLETAR ONBOARDING
+// Guarda los datos físicos recopilados (peso, estatura, género) y marca el onboarding como completado.
+exports.completeOnboarding = async (req, res) => {
+    const { peso_kg, estatura_cm, genero } = req.body;
+    try {
+        await db.query(
+            `UPDATE usuarios SET peso_kg = ?, estatura_cm = ?, genero = ?, onboarding_completed = 1 WHERE idUsuario = ?`,
+            [peso_kg || null, estatura_cm || null, genero || null, req.user.id]
+        );
+        res.json({ message: "Onboarding completado correctamente", onboarding_completed: true });
+    } catch (err) {
+        console.error("Error completando onboarding:", err);
+        res.status(500).json({ error: err.message });
     }
 };

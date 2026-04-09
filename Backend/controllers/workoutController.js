@@ -1,6 +1,6 @@
 const db = require('../config/db');
 
-// --- CONFIGURACIÓN DE RANGOS (Symmetry System) ---
+// --- CONFIGURACIÓN DE RANGOS (Oxyra System) ---
 const RANK_SYSTEM = {
     tiers: [
         { dbValue: 'Oxyra',     label: '🌌 OXYRA',    req: 1.00 }, 
@@ -155,7 +155,7 @@ exports.saveWorkoutSession = async (req, res) => {
                     [workoutId, exercise.idEjercicio || null, exercise.nombre || "Ejercicio", i + 1, w, r]
                 );
 
-                // Calcular 1RM para Symmetry
+                // Calcular 1RM para Oxyra
                 const estimated1RM = calculate1RM(w, r);
                 if (estimated1RM > bestSet1RM) bestSet1RM = estimated1RM;
             }
@@ -171,8 +171,8 @@ exports.saveWorkoutSession = async (req, res) => {
             }
         }
 
-        // 3. Actualizar Rangos Symmetry
-        console.log(`\n📊 SYMMETRY UPDATE (User: ${userId}, Peso: ${userWeight}kg)`);
+        // 3. Actualizar Rangos Oxyra
+        console.log(`\n📊 Oxyra UPDATE (User: ${userId}, Peso: ${userWeight}kg)`);
         for (const [muscle, oneRM] of Object.entries(statsToUpdate)) {
             const ratio = userWeight > 0 ? (oneRM / userWeight) : 0;
             const rankInfo = calculateRank(ratio, muscle);
@@ -197,5 +197,61 @@ exports.saveWorkoutSession = async (req, res) => {
         res.status(500).json({ error: "Error interno al guardar entrenamiento", details: error.message });
     } finally {
         connection.release();
+    }
+};
+
+// --- GRÁFICA DE VOLUMEN ---
+exports.getVolumeChart = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const period = req.query.period || 'week';
+
+        // Build date cutoff
+        let cutoffDays = null;
+        switch (period) {
+            case 'week':    cutoffDays = 7;   break;
+            case 'month':   cutoffDays = 30;  break;
+            case '3months': cutoffDays = 90;  break;
+            case 'year':    cutoffDays = 365; break;
+            case 'all':     cutoffDays = null; break;
+            default:        cutoffDays = 7;
+        }
+
+        let sql, params;
+        if (cutoffDays !== null) {
+            sql = `
+                SELECT 
+                    DATE_FORMAT(h.fecha_fin, '%Y-%m-%d') AS dia,
+                    ROUND(SUM(s.kg_levantados * s.reps_realizadas), 1) AS volumen_kg
+                FROM historial_workouts h
+                JOIN historial_sets s ON s.workout_id = h.idWorkout
+                WHERE h.usuario_id = ?
+                  AND h.fecha_fin IS NOT NULL
+                  AND h.fecha_fin >= DATE_SUB(NOW(), INTERVAL ? DAY)
+                GROUP BY DATE_FORMAT(h.fecha_fin, '%Y-%m-%d')
+                ORDER BY DATE_FORMAT(h.fecha_fin, '%Y-%m-%d') ASC
+            `;
+            params = [userId, cutoffDays];
+        } else {
+            sql = `
+                SELECT 
+                    DATE_FORMAT(h.fecha_fin, '%Y-%m-%d') AS dia,
+                    ROUND(SUM(s.kg_levantados * s.reps_realizadas), 1) AS volumen_kg
+                FROM historial_workouts h
+                JOIN historial_sets s ON s.workout_id = h.idWorkout
+                WHERE h.usuario_id = ?
+                  AND h.fecha_fin IS NOT NULL
+                GROUP BY DATE_FORMAT(h.fecha_fin, '%Y-%m-%d')
+                ORDER BY DATE_FORMAT(h.fecha_fin, '%Y-%m-%d') ASC
+            `;
+            params = [userId];
+        }
+
+        const [rows] = await db.query(sql, params);
+        res.json({ data: rows });
+
+    } catch (error) {
+        console.error("❌ ERROR getVolumeChart:", error.message, error.sql);
+        res.status(500).json({ error: "Error al obtener gráfica de volumen", detail: error.message });
     }
 };

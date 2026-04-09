@@ -56,7 +56,10 @@ export default function AdminLayout() {
     <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-blue-500 selection:text-white">
 
       {/* ===== HEADER TOP BAR ===== */}
-      <header className="border-b border-white/5 bg-zinc-950/90 backdrop-blur-2xl sticky top-0 z-[100]">
+      <header 
+        className="border-b border-white/5 bg-zinc-950/90 backdrop-blur-2xl sticky top-0 z-[100]"
+        style={{ paddingTop: 'var(--safe-area-top)' }}
+      >
         <div className="flex items-center justify-between h-16 px-4 md:px-6">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -65,7 +68,7 @@ export default function AdminLayout() {
             </div>
             <div className="hidden sm:block">
               <span className="text-sm font-black tracking-tight">Oxyra <span className="text-blue-500">Admin</span></span>
-              <p className="text-[9px] text-zinc-600 uppercase tracking-[0.15em] font-black">Sistema de Control</p>
+              <p className="text-[9px] text-zinc-600 uppercase tracking-[0.15em] font-black">Sistema de Control</p> 
             </div>
           </div>
 
@@ -116,7 +119,10 @@ export default function AdminLayout() {
       </main>
 
       {/* ===== MOBILE BOTTOM NAV ===== */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-zinc-950/95 backdrop-blur-2xl border-t border-white/5">
+      <nav 
+        className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-zinc-950/95 backdrop-blur-2xl border-t border-white/5"
+        style={{ paddingBottom: 'var(--safe-area-bottom)' }}
+      >
         <div className="flex items-center justify-around h-16 px-2">
           {NAV_ITEMS.map((item) => (
             <NavLink

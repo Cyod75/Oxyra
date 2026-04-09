@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
     --primary: 221.2 83.2% 53.3%;
-    /* Azul Eléctrico (Symmetry) */
+    /* Azul Eléctrico*/
     --primary-foreground: 210 40% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
@@ -28,7 +28,6 @@
     --input: 240 5.9% 90%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.75rem;
-    /* Bordes más redondeados (Moderno) */
   }
 
   /* MODO OSCURO */
@@ -40,7 +39,6 @@
 
     /* Tarjetas con ligera transparencia y negro suave */
     --card: 240 10% 3.9%;
-    /* Mismo fondo para efecto 'flat' limpio */
     --card-foreground: 0 0% 98%;
 
     --popover: 240 10% 3.9%;
@@ -78,8 +76,55 @@
 
   body {
     @apply bg-background text-foreground;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ocultar barra de scroll globalmente pero mantener funcionalidad */
+  * {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE y Edge */
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari y Opera */
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
+  /* Clases adicionales para forzar el ocultamiento de scrollbars localmente */
+  .hidden-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .hidden-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ocultar flechas de inputs de número */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
   }
 }
+
 
 /* CLASES DE UTILIDAD PARA GLASSMORPHISM*/
 .glass {
@@ -88,4 +133,31 @@
 
 .glass-card {
   @apply bg-card/50 backdrop-blur-sm border border-white/10 shadow-lg;
+}
+
+/* 
+   SAFE AREAS - Solo activo en la app nativa (Capacitor)
+   En web browser las variables quedan a 0px (sin efecto visual)
+   Capacitor añade automáticamente la clase "capacitor" al <body>
+    */
+:root {
+  --safe-area-top: 0px;
+  --safe-area-bottom: 0px;
+}
+
+body.is-native-app {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Ocultar el Action Button de Stripe Link / Test Mode que persiste en pantalla al cerrar */
+div[class*="FloatingActionButton-wrapper"],
+div[class*="Container"]>header>svg[class*="Logo"],
+iframe[src*="elements-inner-easel"],
+iframe[title*="desarrolladores de Stripe"],
+iframe[title*="Stripe developer"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

@@ -1,13 +1,15 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { RANK_COLORS } from "@/config/ranksColors";
+import { RANK_ICONS } from "@/components/shared/ranksHelpers";
+import DefaultAvatar from "@/components/DefaultAvatar";
 
 export default function LeaderboardItem({ user, position, isCurrentUser = false }) {
   const navigate = useNavigate();
   const rankColor = RANK_COLORS[user.rango_global] || RANK_COLORS["Sin Rango"];
+  const rankIcon = RANK_ICONS[user.rango_global];
 
   return (
     <motion.div
@@ -30,15 +32,25 @@ export default function LeaderboardItem({ user, position, isCurrentUser = false 
 
       {/* Avatar */}
       <div className="relative">
-        <Avatar
-          className="h-10 w-10 border-2"
+        <DefaultAvatar
+          userId={user.idUsuario ?? user.username}
+          name={user.nombre_completo || user.username}
+          src={user.foto_perfil}
+          size="h-10 w-10"
+          className="border-2 ring-0"
           style={{ borderColor: rankColor }}
-        >
-          <AvatarImage src={user.foto_perfil} className="object-cover" />
-          <AvatarFallback className="bg-zinc-800 text-zinc-400 font-bold text-xs">
-            {user.username?.substring(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        />
+        {/* Mini rank icon badge over avatar */}
+        {rankIcon && (
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background flex items-center justify-center border border-border/20">
+            <img 
+              src={rankIcon} 
+              alt={user.rango_global} 
+              className="w-3.5 h-3.5 object-contain" 
+              style={{ transform: user.rango_global === 'Sin Rango' ? 'scale(1.2)' : 'none' }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Info */}
@@ -51,13 +63,23 @@ export default function LeaderboardItem({ user, position, isCurrentUser = false 
             <span className="ml-1.5 text-[10px] font-medium text-primary/70">(Tú)</span>
           )}
         </p>
-        <Badge
-          variant="outline"
-          className="mt-0.5 text-[10px] px-1.5 py-0 h-4 border-transparent"
-          style={{ color: rankColor, backgroundColor: `${rankColor}15` }}
-        >
-          {user.rango_global || "Sin Rango"}
-        </Badge>
+        <div className="flex items-center gap-1 mt-0.5">
+          {rankIcon && (
+            <img 
+              src={rankIcon} 
+              alt="" 
+              className="w-3 h-3 object-contain opacity-70" 
+              style={{ transform: user.rango_global === 'Sin Rango' ? 'scale(1.2)' : 'none' }}
+            />
+          )}
+          <Badge
+            variant="outline"
+            className="text-[10px] px-1.5 py-0 h-4 border-transparent"
+            style={{ color: rankColor, backgroundColor: `${rankColor}15` }}
+          >
+            {user.rango_global || "Sin Rango"}
+          </Badge>
+        </div>
       </div>
 
       {/* Score */}

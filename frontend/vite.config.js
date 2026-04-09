@@ -10,10 +10,8 @@ export default defineConfig({
     svgr(),
 
     VitePWA({
-      registerType: 'prompt', // Muestra "Nueva versión disponible" en vez de recargar solo
+      registerType: 'prompt',
       injectRegister: 'auto',
-
-      // Solo incluimos los iconos esenciales
       includeAssets: [
         'favicon.ico',
         'apple-touch-icon.png',
@@ -28,15 +26,14 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         display: 'standalone',
-        orientation: 'portrait', // Bloquea rotación (ideal para gym)
+        orientation: 'portrait', // Bloquea rotación 
 
         theme_color: '#0a0a0a',
-        background_color: '#000000', // Evita pantallazo blanco al abrir
+        background_color: '#000000',
 
         lang: 'es-ES',
         categories: ['fitness', 'health', 'sports'],
 
-        // Iconos (Asegúrate de tener estos dos archivos en /public)
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -119,8 +116,10 @@ export default defineConfig({
     chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom']
+        manualChunks(id) {
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/scheduler/')) {
+            return 'vendor-react';
+          }
         }
       }
     }

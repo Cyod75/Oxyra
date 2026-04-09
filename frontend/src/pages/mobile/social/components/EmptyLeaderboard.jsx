@@ -1,8 +1,10 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { IconSearch, IconUserPlus } from "@/components/icons/Icons";
 
 export default function EmptyLeaderboard({ onSwitchToExplore }) {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -21,10 +23,10 @@ export default function EmptyLeaderboard({ onSwitchToExplore }) {
       </div>
 
       <h3 className="text-lg font-bold text-foreground mb-1">
-        La competencia es mejor con amigos
+        {t("social.leaderboard.empty.title")}
       </h3>
       <p className="text-sm text-muted-foreground max-w-[260px] mb-6 leading-relaxed">
-        Añade amigos para competir en el ranking y ver quién tiene el mejor Oxyra Score.
+        {t("social.leaderboard.empty.description")}
       </p>
 
       {/* CTA */}
@@ -33,7 +35,7 @@ export default function EmptyLeaderboard({ onSwitchToExplore }) {
         className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20"
       >
         <IconSearch className="h-4 w-4" />
-        Buscar Amigos
+        {t("social.leaderboard.empty.search_button")}
       </button>
     </motion.div>
   );

@@ -21,26 +21,27 @@ router.get('/search', authMiddleware, userController.searchUsers);
 router.put('/change-password', authMiddleware, userController.changePassword);
 router.post('/subscribe', authMiddleware, userController.subscribePro);
 router.post('/cancel-subscription', authMiddleware, userController.cancelPro);
+router.post('/complete-onboarding', authMiddleware, userController.completeOnboarding);
 
 // Gestión de Notificaciones
 router.get('/notifications/status', authMiddleware, notifController.getNotificationStatus);
 router.post('/notifications/toggle', authMiddleware, notifController.toggleNotifications);
 
-// Generación con IA
-router.post('/generate-routine', authMiddleware, aiController.generateRoutine);
-// Generación IA (PROTEGIDA CON DOBLE CANDADO: AUTH + PRO)
+// Generación IA (AUTH + PRO)
 router.post('/generate-routine', authMiddleware, proMiddleware, aiController.generateRoutine);
+router.post('/generate-routine/onboarding', authMiddleware, aiController.generateRoutine);
 
 // Gestión Manual y Visualización
 router.get('/routines', authMiddleware, routineController.getMyRoutines);
 router.get('/exercises', authMiddleware, routineController.getAllExercises);
 router.post('/routine/manual', authMiddleware, routineController.createManualRoutine);
-router.get('/routine/:id', authMiddleware, routineController.getRoutineDetail);
+router.get('/routine/:id', authMiddleware, routineController.getRoutineDetail); 
 router.put('/routine/:id', authMiddleware, routineController.updateRoutine);
 router.delete('/routine/:id', authMiddleware, routineController.deleteRoutine);
 
 // RUTAS DE ENTRENAMIENTO
 router.post('/workout/save', authMiddleware, workoutController.saveWorkoutSession);
+router.get('/workout/volume-chart', authMiddleware, workoutController.getVolumeChart);
 
 // RUTAS DE PRODUCTOS
 router.get('/', authMiddleware, productController.getAllProducts);

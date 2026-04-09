@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { API_URL } from "../../config/api";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { IconLoader, IconCheck, IconRotate, IconLock } from "../../components/icons/Icons";
@@ -9,11 +8,11 @@ import ModernLoader from "../../components/shared/ModernLoader";
 import BackButton from "../../components/shared/BackButton";
 import BodyFront from "../../components/shared/BodyFront";
 import BodyBack from "../../components/shared/BodyBack";
+import { RANK_ICONS } from "../../components/shared/ranksHelpers";
 import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
-
-const DEFAULT_AVATAR =
-  "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+import { es, enUS } from "date-fns/locale";
+import { oxyAlert } from "../../utils/customAlert";
+import { useTranslation } from "react-i18next";
 
 // Configuración de colores por rango
 const RANK_COLORS = {
@@ -29,7 +28,8 @@ const RANK_COLORS = {
 };
 
 export default function MobilePublicProfile() {
-  const { username } = useParams(); 
+  const { t, i18n } = useTranslation();
+  const username = useParams().username; 
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -50,7 +50,7 @@ export default function MobilePublicProfile() {
 
       if (!res.ok) {
         if (res.status === 404) {
-          alert("Usuario no encontrado");
+          await oxyAlert(t("profile.public_profile.user_not_found"));
           navigate(-1);
         }
         return;
@@ -132,7 +132,7 @@ export default function MobilePublicProfile() {
   if (loading)
     return (
       <div className="h-screen w-full flex items-center justify-center bg-background fixed top-0 left-0 z-[100]">
-        <ModernLoader text="CARGANDO PERFIL..." />
+        <ModernLoader text={t("profile.preparing_profile")} />
       </div>
     );
   if (!profile) return null;
@@ -143,7 +143,10 @@ export default function MobilePublicProfile() {
     <div className="relative min-h-screen bg-background text-foreground font-sans overflow-hidden selection:bg-primary/30">
         
       {/* 2. HEADER: Identidad (Glassmorphism) */}
-      <div className="relative z-50 sticky top-0 w-full bg-background/80 backdrop-blur-xl border-b border-border/10 h-16 flex items-center justify-center">
+      <div
+        className="relative z-50 sticky top-0 w-full bg-background/80 backdrop-blur-xl border-b border-border/10 flex items-center justify-center pb-2"
+        style={{ paddingTop: 'calc(0.5rem + var(--safe-area-top))', height: 'calc(4rem + var(--safe-area-top))' }}
+      >
         
         {/* Izquierda: Back Button */}
         <div className="absolute left-4">
@@ -155,12 +158,22 @@ export default function MobilePublicProfile() {
             <h1 className="text-sm font-black italic tracking-wider">@{profile.username}</h1>
             {profile.es_pro ? (
                 <span className="text-[9px] font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 uppercase tracking-widest mt-0.5">
-                    PRO ATHLETE
+                    {t("profile.pro_athlete")}
                 </span>
             ) : (
-                <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">
-                    {profile.rango_global || "ATHLETE"}
-                </span>
+                <div className="flex items-center gap-1 mt-0.5">
+                    {RANK_ICONS[profile.rango_global] && (
+                        <img 
+                            src={RANK_ICONS[profile.rango_global]} 
+                            alt="" 
+                            className="w-3.5 h-3.5 object-contain opacity-70" 
+                            style={{ transform: profile.rango_global === 'Sin Rango' ? 'scale(1.15)' : 'none' }}
+                        />
+                    )}
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                        {profile.rango_global || t("profile.public_profile.athlete")}
+                    </span>
+                </div>
             )}
         </div>
         
@@ -181,11 +194,11 @@ export default function MobilePublicProfile() {
                 {followLoading ? (
                     <IconLoader className="animate-spin h-3 w-3" /> 
                 ) : profile.lo_sigo ? (
-                    "SIGUIENDO" 
+                    t("profile.public_profile.following")
                 ) : profile.pendiente ? (
-                    "PENDIENTE"
+                    t("profile.public_profile.pending")
                 ) : (
-                    "SEGUIR"
+                    t("profile.public_profile.follow")
                 )}
             </Button>
         </div>
@@ -216,15 +229,15 @@ export default function MobilePublicProfile() {
 
             {/* Stats Distribuidos (Izquierda / Derecha) */}
             <div className="absolute top-4 left-4 flex flex-col gap-2">
-                 <GlassStat label="ENTRENOS" value={profile.stats.entrenos} align="start" />
+                 <GlassStat label={t("profile.workouts").toUpperCase()} value={profile.stats.entrenos} align="start" />
             </div>
 
             <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
                  <div onClick={() => navigate(`/profile/${profile.username}/followers`)} className="cursor-pointer hover:opacity-80 active:scale-95 transition-all">
-                   <GlassStat label="SEGUIDORES" value={profile.stats.seguidores} align="end" />
+                   <GlassStat label={t("profile.followers").toUpperCase()} value={profile.stats.seguidores} align="end" />
                  </div>
                  <div onClick={() => navigate(`/profile/${profile.username}/following`)} className="cursor-pointer hover:opacity-80 active:scale-95 transition-all">
-                   <GlassStat label="SEGUIDOS" value={profile.stats.seguidos} align="end" />
+                   <GlassStat label={t("profile.following").toUpperCase()} value={profile.stats.seguidos} align="end" />
                  </div>
             </div>
         </div>
@@ -232,21 +245,21 @@ export default function MobilePublicProfile() {
         {/* 4. NIVEL 3: DATOS (Historial Glass Cards) */}
         <div className="px-4 mt-4">
             <div className="flex items-end gap-2 mb-4 border-b border-border/10 pb-2">
-                <h3 className="text-xl font-black italic text-foreground">ACTIVIDAD</h3>
-                <span className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">RECENT LOGS</span>
+                <h3 className="text-xl font-black italic text-foreground">{t("profile.public_profile.activity")}</h3>
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">{t("profile.public_profile.recent_logs")}</span>
             </div>
 
             <div className="space-y-3">
                 {profile.is_private_restricted ? (
                      <div className="rounded-xl border border-dashed border-border/40 p-8 flex flex-col items-center justify-center text-center opacity-60">
-                         <div className="p-3 bg-secondary rounded-full mb-3">
-                            <IconLock className="h-6 w-6 text-muted-foreground" />
-                         </div>
-                         <h4 className="text-sm font-bold uppercase tracking-widest text-foreground">Cuenta Privada</h4>
-                         <p className="text-[10px] text-muted-foreground mt-1 max-w-[200px]">
-                            Sigue a este atleta para ver sus estadísticas y entrenamientos.
-                         </p>
+                     <div className="p-3 bg-secondary rounded-full mb-3">
+                        <IconLock className="h-6 w-6 text-muted-foreground" />
                      </div>
+                     <h4 className="text-sm font-bold uppercase tracking-widest text-foreground">{t("profile.public_profile.private_account_title")}</h4>
+                     <p className="text-[10px] text-muted-foreground mt-1 max-w-[200px]">
+                        {t("profile.public_profile.private_account_desc")}
+                     </p>
+                 </div>
                 ) : profile.recentWorkouts && profile.recentWorkouts.length > 0 ? (
                     profile.recentWorkouts.map((workout, idx) => (
                         <div key={idx} className="group relative overflow-hidden rounded-xl bg-card border border-border/50 p-4 shadow-sm transition-all hover:shadow-md">
@@ -257,14 +270,17 @@ export default function MobilePublicProfile() {
                                 <div>
                                     <h4 className="font-bold text-sm text-foreground leading-tight mb-1">{workout.nombre_sesion}</h4>
                                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                                        {formatDistanceToNow(new Date(workout.fecha_fin), { addSuffix: true, locale: es })}
+                                        {formatDistanceToNow(new Date(workout.fecha_fin), { 
+                                            addSuffix: true, 
+                                            locale: i18n.language === 'es' ? es : enUS 
+                                        })}
                                     </p>
                                 </div>
                                 <div className="flex flex-col items-end">
                                     <span className="text-lg font-black italic text-foreground/20 group-hover:text-primary transition-colors">
                                         {workout.duracion_minutos}'
                                     </span>
-                                    <span className="text-[8px] uppercase tracking-widest text-muted-foreground/50">DURACIÓN</span>
+                                    <span className="text-[8px] uppercase tracking-widest text-muted-foreground/50">{t("profile.public_profile.duration_label")}</span>
                                 </div>
                             </div>
                         </div>
@@ -272,7 +288,7 @@ export default function MobilePublicProfile() {
                 ) : (
                     <div className="rounded-xl border border-dashed border-border/40 p-8 flex flex-col items-center justify-center text-center opacity-40">
                         <span className="text-2xl mb-2">⚡</span>
-                        <p className="text-xs uppercase tracking-widest text-muted-foreground">Sin actividad registrada</p>
+                        <p className="text-xs uppercase tracking-widest text-muted-foreground">{t("profile.public_profile.no_activity")}</p>
                     </div>
                 )}
             </div>

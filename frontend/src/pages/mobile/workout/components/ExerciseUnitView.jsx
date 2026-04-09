@@ -1,12 +1,16 @@
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { IconDumbbell, IconTimer, IconPlus, IconInfo } from "../../../../components/icons/Icons";
+import { vibrateCheck } from "../../../../utils/notifications";
 import { Button } from "@/components/ui/button";
+import { oxyConfirm } from "../../../../utils/customAlert";
 import SetRow from "./SetRow";
 import ScrollPickerSheet from "./ScrollPickerSheet"; 
 import ExerciseInfoSheet from "./ExerciseInfoSheet";
 import { exerciseVisuals } from "../../../../data/exerciseVisuals";
 
 export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorkoutData, onSetComplete }) {
+  const { t } = useTranslation();
   
   // --- DETECCIÓN DE VISUAL DEL EJERCICIO ---
   const visualBaseUrl = exerciseData?.nombre ? exerciseVisuals[exerciseData.nombre] : null;
@@ -71,6 +75,7 @@ export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorko
         
         // --- LÓGICA DE AUTO-COMPLETADO DE LA SIGUIENTE SERIE ---
         if (field === 'completed' && value === true) {
+            vibrateCheck(); // Vibración corta de confirmación al marcar serie
             // 1. Disparar timer
             onSetComplete(newData[exerciseIndex].currentRestTimerSetting);
             
@@ -105,8 +110,8 @@ export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorko
      });
   };
 
-  const handleDeleteSet = (setIndex) => {
-      if (!window.confirm("¿Eliminar esta serie?")) return;
+  const handleDeleteSet = async (setIndex) => {
+      if (!(await oxyConfirm(t("workout_session.exercise.delete_set_confirm")))) return;
       updateExerciseData(newData => {
           newData[exerciseIndex].performedSets.splice(setIndex, 1);
       });
@@ -149,8 +154,8 @@ export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorko
         {/* Info y Timer Button */}
         <div className="flex items-center justify-between mb-6 bg-secondary/20 p-3 rounded-xl border border-border/50">
             <div className="text-sm">
-                <span className="text-primary font-bold uppercase tracking-wide text-xs block mb-1">Músculo</span>
-                <span className="font-semibold">{exerciseData.grupo_muscular}</span>
+                <span className="text-primary font-bold uppercase tracking-wide text-xs block mb-1">{t("workout_session.exercise.muscle")}</span>
+                <span className="font-semibold">{t(`muscles.${exerciseData.grupo_muscular}`, { defaultValue: exerciseData.grupo_muscular })}</span>
             </div>
             
             <div className="flex items-center gap-2">
@@ -177,10 +182,10 @@ export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorko
 
         {/* Tabla Headers */}
         <div className="grid grid-cols-[40px_1fr_1fr_40px] gap-3 mb-3 px-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">
-            <span>Set</span>
-            <span>Kg</span>
-            <span>Reps</span>
-            <span>Hecho</span>
+            <span>{t("workout_session.exercise.set")}</span>
+            <span>{t("workout_session.exercise.kg")}</span>
+            <span>{t("workout_session.exercise.reps")}</span>
+            <span>{t("workout_session.exercise.done")}</span>
         </div>
 
         {/* Lista de Sets */}
@@ -204,7 +209,7 @@ export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorko
             className="w-full mt-6 border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 h-12"
             onClick={handleAddSet}
         >
-            <IconPlus className="w-4 h-4 mr-2" /> Añadir Serie
+            <IconPlus className="w-4 h-4 mr-2" /> {t("workout_session.exercise.add_set")}
         </Button>
       </div>
 
@@ -212,7 +217,7 @@ export default function ExerciseUnitView({ exerciseData, exerciseIndex, setWorko
       <ScrollPickerSheet 
         open={pickerConfig.isOpen}
         onOpenChange={(isOpen) => setPickerConfig(prev => ({ ...prev, isOpen }))}
-        title={pickerConfig.type === 'timer' ? 'Descanso' : pickerConfig.type === 'weight' ? 'Peso (Kg)' : 'Repeticiones'}
+        title={pickerConfig.type === 'timer' ? t("workout_session.exercise.rest_title") : pickerConfig.type === 'weight' ? t("workout_session.exercise.weight_title") : t("workout_session.exercise.reps_title")}
         initialValue={pickerConfig.currentValue}
         options={pickerConfig.type === 'timer' ? timerOptions : pickerConfig.type === 'weight' ? weightOptions : repsOptions}
         suffix={pickerConfig.type === 'timer' ? 's' : pickerConfig.type === 'weight' ? 'kg' : ''}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -20,6 +21,7 @@ function useDebounce(value, delay) {
 }
 
 export default function MobileSearch() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("explorar");
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 500);
@@ -72,10 +74,13 @@ export default function MobileSearch() {
     <div className="flex flex-col h-screen bg-background text-foreground animate-in fade-in duration-300">
       
       {/* --- HEADER STICKY --- */}
-      <div className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-border/40 pt-4 pb-0 px-4">
+      <div
+        className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-border/40 pb-0 px-4"
+        style={{ paddingTop: 'calc(1rem + var(--safe-area-top))' }}
+      >
         <div className="flex items-center gap-3 mb-3">
           <BackButton className="shrink-0" />
-          <h1 className="text-lg font-bold flex-1">Comunidad</h1>
+          <h1 className="text-lg font-bold flex-1">{t("search.community")}</h1>
         </div>
 
         {/* Tabs */}
@@ -86,14 +91,14 @@ export default function MobileSearch() {
               className="flex-1 rounded-lg text-xs font-bold data-[state=active]:bg-zinc-800 data-[state=active]:text-foreground data-[state=active]:shadow-sm gap-1.5 transition-all"
             >
               <IconSearch className="h-3.5 w-3.5" />
-              Explorar
+              {t("search.explore")}
             </TabsTrigger>
             <TabsTrigger 
               value="ranking" 
               className="flex-1 rounded-lg text-xs font-bold data-[state=active]:bg-zinc-800 data-[state=active]:text-foreground data-[state=active]:shadow-sm gap-1.5 transition-all"
             >
               <IconTrophy className="h-3.5 w-3.5" />
-              Ranking
+              {t("search.ranking")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -113,7 +118,7 @@ export default function MobileSearch() {
                   <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 h-4 w-4 transition-colors group-focus-within:text-primary" />
                   <Input 
                     ref={inputRef}
-                    placeholder="Buscar atletas..." 
+                    placeholder={t("search.search_placeholder")} 
                     className="pl-10 pr-10 h-11 rounded-2xl bg-secondary/50 border-transparent focus-visible:bg-secondary focus-visible:ring-1 focus-visible:ring-primary/30 transition-all text-base shadow-sm"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -165,7 +170,7 @@ export default function MobileSearch() {
                   {loading && (
                     <div className="flex flex-col items-center justify-center py-12 gap-3 opacity-70">
                       <IconLoader className="animate-spin text-primary h-8 w-8" />
-                      <p className="text-xs font-medium text-muted-foreground animate-pulse">Buscando perfiles...</p>
+                      <p className="text-xs font-medium text-muted-foreground animate-pulse">{t("search.searching")}</p>
                     </div>
                   )}
 
@@ -175,9 +180,9 @@ export default function MobileSearch() {
                       <div className="w-20 h-20 bg-secondary/50 rounded-full flex items-center justify-center mb-4 border border-border">
                         <IconSearch className="h-10 w-10 text-muted-foreground" />
                       </div>
-                      <h3 className="text-lg font-bold">Descubre la comunidad</h3>
+                      <h3 className="text-lg font-bold">{t("search.discover_community")}</h3>
                       <p className="text-sm text-muted-foreground max-w-[200px]">
-                        Busca amigos, competidores o inspiración.
+                        {t("search.discover_desc")}
                       </p>
                     </div>
                   )}
@@ -186,8 +191,8 @@ export default function MobileSearch() {
                   {!loading && results.length === 0 && query.length > 1 && (
                     <div className="flex flex-col items-center justify-center py-10 gap-2 opacity-60">
                       <IconUser className="h-12 w-12 text-muted-foreground mb-2" />
-                      <p className="text-sm font-medium">No encontramos a "{query}"</p>
-                      <p className="text-xs text-muted-foreground">Prueba con otro nombre de usuario.</p>
+                      <p className="text-sm font-medium">{t("search.not_found", { query })}</p>
+                      <p className="text-xs text-muted-foreground">{t("search.try_another")}</p>
                     </div>
                   )}
 
@@ -195,7 +200,7 @@ export default function MobileSearch() {
                   <div className="space-y-3">
                     {results.length > 0 && (
                       <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 pl-1">
-                        Resultados
+                        {t("search.results")}
                       </p>
                     )}
                     {results.map((user) => (

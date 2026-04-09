@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   IconBackArrow,
   IconDumbbell,
@@ -19,8 +20,10 @@ import {
 } from "@/components/ui/sheet";
 import { API_URL } from "../../../config/api";
 import BackButton from "../../../components/shared/BackButton";
+import { oxyAlert } from "../../../utils/customAlert";
 
 export default function RoutineDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [routine, setRoutine] = useState(null);
@@ -71,7 +74,10 @@ export default function RoutineDetail() {
 
   const handleUpdateRoutine = async () => {
     // Validaciones front-end rápidas
-    if (!editForm.nombre.trim()) return alert("El nombre es obligatorio");
+    if (!editForm.nombre.trim()) {
+      await oxyAlert(t("routine_detail.name_required"));
+      return;
+    }
 
     setSaving(true);
     try {
@@ -92,11 +98,11 @@ export default function RoutineDetail() {
         setIsEditSheetOpen(false);
       } else {
         const err = await res.json();
-        alert(err.error || "Error al actualizar");
+        await oxyAlert(err.error || t("routine_detail.error_updating"));
       }
     } catch (error) {
-      console.error("Error guardando:", error);
-      alert("Error de conexión");
+        console.error("Error guardando:", error);
+        await oxyAlert(t("common.connection_error") || "Error de conexión");
     } finally {
       setSaving(false);
     }
@@ -118,7 +124,7 @@ export default function RoutineDetail() {
   if (!routine)
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-        Rutina no encontrada
+        {t("routine_detail.not_found")}
       </div>
     );
 
@@ -133,7 +139,10 @@ export default function RoutineDetail() {
         <IconDumbbell className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 text-primary/5 z-0 rotate-12" />
 
         {/* NAV BAR */}
-        <div className="absolute top-0 left-0 right-0 z-50 flex justify-between items-center p-4 pt-6">
+        <div 
+          className="absolute top-0 left-0 right-0 z-50 flex justify-between items-center p-4"
+          style={{ paddingTop: 'calc(1rem + var(--safe-area-top))' }}
+        >
           <BackButton 
             className="bg-background/30 backdrop-blur-md rounded-full hover:bg-background/50 border border-white/10 text-white w-10 h-10 p-0 ml-0"
           />
@@ -153,7 +162,7 @@ export default function RoutineDetail() {
             {/* Badge Nivel */}
             {routine.nivel && (
               <span className="px-2.5 py-1 rounded-lg bg-blue-500/20 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-wide backdrop-blur-sm">
-                {routine.nivel}
+                {t(`training.levels.${routine.nivel}`, { defaultValue: routine.nivel })}
               </span>
             )}
             {/* Badge Objetivo (Ahora Editable) */}
@@ -176,13 +185,13 @@ export default function RoutineDetail() {
         <div className="mb-8 group">
           <div className="flex items-center justify-between mb-3 px-1">
             <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-              Descripción del plan
+              {t("routine_detail.description_label")}
             </h3>
             <button
               onClick={() => setIsEditSheetOpen(true)}
               className="text-primary text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              Editar
+              {t("routine_detail.edit")}
             </button>
           </div>
 
@@ -190,7 +199,7 @@ export default function RoutineDetail() {
             <p className="text-foreground/90 text-sm leading-relaxed whitespace-pre-line">
               {routine.descripcion || (
                 <span className="italic text-muted-foreground opacity-70">
-                  Sin descripción añadida.
+                  {t("routine_detail.no_description")}
                 </span>
               )}
             </p>
@@ -201,14 +210,14 @@ export default function RoutineDetail() {
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-2 px-1">
             <IconCalendar className="w-4 h-4 text-primary" />
-            <h3 className="text-lg font-bold text-foreground">Rutina de hoy</h3>
+            <h3 className="text-lg font-bold text-foreground">{t("routine_detail.today_routine")}</h3>
           </div>
 
           {routine.ejercicios.length === 0 ? (
             <div className="text-center py-12 border-2 border-dashed border-border/50 rounded-3xl bg-secondary/5">
               <IconDumbbell className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
               <p className="text-muted-foreground text-sm font-medium">
-                No hay ejercicios configurados.
+                {t("routine_detail.no_exercises")}
               </p>
             </div>
           ) : (
@@ -223,11 +232,11 @@ export default function RoutineDetail() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-foreground text-sm truncate">
-                      {ejercicio.nombre}
+                      {t(`exercises.${ejercicio.nombre}`, { defaultValue: ejercicio.nombre })}
                     </h4>
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
                       <span className="text-primary/80 font-semibold bg-primary/5 px-1.5 rounded">
-                        {ejercicio.grupo_muscular}
+                        {t(`muscles.${ejercicio.grupo_muscular}`, { defaultValue: ejercicio.grupo_muscular })}
                       </span>
                       <span className="opacity-50">•</span>
                       <span>
@@ -249,7 +258,7 @@ export default function RoutineDetail() {
           onClick={() => navigate(`/workout/session/${id}`)}
           disabled={routine.ejercicios.length === 0}
         >
-          Comenzar Entrenamiento
+          {t("routine_detail.start_workout")}
         </Button>
       </div>
 
@@ -260,7 +269,7 @@ export default function RoutineDetail() {
           className="rounded-t-[32px] px-6 pb-8 bg-background border-t border-border focus:outline-none max-h-[90vh] overflow-y-auto"
         >
           <SheetHeader className="mb-6 mt-4 text-center">
-            <SheetTitle>Editar Detalles</SheetTitle>
+            <SheetTitle>{t("routine_detail.edit_sheet_title")}</SheetTitle>
           </SheetHeader>
 
           <div className="space-y-6">
@@ -268,7 +277,7 @@ export default function RoutineDetail() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <label className="text-xs font-bold text-muted-foreground uppercase">
-                  Nombre de la Rutina
+                  {t("routine_detail.name_label")}
                 </label>
                 <span
                   className={`text-xs font-mono ${editForm.nombre.length >= LIMITS.nombre ? "text-red-500" : "text-muted-foreground/50"}`}
@@ -280,7 +289,7 @@ export default function RoutineDetail() {
                 className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-3 text-foreground font-bold focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all"
                 value={editForm.nombre}
                 onChange={(e) => handleChange("nombre", e.target.value)}
-                placeholder="Ej: Push Day A"
+                placeholder={t("training.rename_placeholder")}
               />
             </div>
 
@@ -288,7 +297,7 @@ export default function RoutineDetail() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <label className="text-xs font-bold text-muted-foreground uppercase">
-                  Etiqueta / Objetivo
+                  {t("routine_detail.objective_label")}
                 </label>
                 <span
                   className={`text-xs font-mono ${editForm.objetivo.length >= LIMITS.objetivo ? "text-red-500" : "text-muted-foreground/50"}`}
@@ -300,7 +309,7 @@ export default function RoutineDetail() {
                 className="w-full bg-secondary/30 border border-border rounded-xl px-4 py-3 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all"
                 value={editForm.objetivo}
                 onChange={(e) => handleChange("objetivo", e.target.value)}
-                placeholder="Ej: Fuerza, Hipertrofia..."
+                placeholder={t("training.rename_desc")}
               />
             </div>
 
@@ -308,7 +317,7 @@ export default function RoutineDetail() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <label className="text-xs font-bold text-muted-foreground uppercase">
-                  Descripción
+                  {t("routine_detail.description_label")}
                 </label>
                 <span
                   className={`text-xs font-mono ${editForm.descripcion.length >= LIMITS.descripcion ? "text-red-500" : "text-muted-foreground/50"}`}
@@ -318,7 +327,7 @@ export default function RoutineDetail() {
               </div>
               <textarea
                 className="w-full h-32 bg-secondary/30 border border-border rounded-xl p-4 text-foreground text-sm leading-relaxed placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all resize-none"
-                placeholder="Añade notas importantes sobre esta rutina..."
+                placeholder={t("routine_detail.description_placeholder")}
                 value={editForm.descripcion}
                 onChange={(e) => handleChange("descripcion", e.target.value)}
               ></textarea>
@@ -330,7 +339,7 @@ export default function RoutineDetail() {
               disabled={saving}
             >
               {saving ? <IconLoader className="animate-spin mr-2" /> : null}
-              Guardar Cambios
+              {t("routine_detail.save_changes")}
             </Button>
           </div>
         </SheetContent>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { IconSparkles, IconLoader, IconAlertTriangle } from "../../icons/Icons";
 import { API_URL } from '../../../config/api';
 import { useNavigate } from "react-router-dom"; // Para redirigir a settings si es necesario
+import { oxyConfirm } from "../../../utils/customAlert";
 
 export default function CreateRoutineSheet({ open, onOpenChange, onRoutineCreated }) {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export default function CreateRoutineSheet({ open, onOpenChange, onRoutineCreate
         // MANEJO DE ERRORES INTELIGENTE
         if (res.status === 403 && data.error === "REQUIRES_PRO") {
             // Caso: No es Pro
-            if(window.confirm("🔒 Esta función es exclusiva para PRO.\n\n¿Quieres desbloquearla ahora?")) {
+            if(await oxyConfirm("🔒 Esta función es exclusiva para PRO.\n\n¿Quieres desbloquearla ahora?")) {
                 navigate("/settings"); // O abre tu SubscriptionSheet aquí
                 onOpenChange(false);
             }

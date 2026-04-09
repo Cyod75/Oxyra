@@ -10,9 +10,9 @@ const aiController = require('../controllers/aiController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const proMiddleware = require('../middlewares/proMiddleware');
 
-// ============================================
+// 
 // CONFIGURACIÓN MULTER (Memoria — Sin disco por GDPR)
-// ============================================
+// 
 const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB por foto
 
@@ -35,9 +35,9 @@ const upload = multer({
     }
 });
 
-// ============================================
+// 
 // MIDDLEWARE: Manejo de errores de Multer
-// ============================================
+// 
 const handleMulterErrors = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
         switch (err.code) {
@@ -66,9 +66,9 @@ const handleMulterErrors = (err, req, res, next) => {
     next(err);
 };
 
-// ============================================
+// 
 // RUTAS
-// ============================================
+// 
 
 // POST /api/ai/analyze-physique
 // Cadena de middlewares: Auth → PRO Check → Multer Upload → Error Handler → Controller

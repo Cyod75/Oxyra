@@ -7,7 +7,8 @@ const RANK_SCORE_MAP = {
   'Bronce': 20,
   'Plata': 30,
   'Oro': 40,
-  'Esmeralda': 50,
+  'Platino': 50,
+  'Esmeralda': 60,
   'Diamante': 70,
   'Campeon': 85,
   'Oxyra': 100

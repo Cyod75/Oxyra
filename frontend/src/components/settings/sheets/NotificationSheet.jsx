@@ -1,9 +1,11 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { IconBell, IconAlertTriangle } from "../../icons/Icons"; // Ajusta ruta si es necesario
 
 export default function NotificationSheet({ open, onOpenChange, onConfirmDisable, loading }) {
+  const { t } = useTranslation();
   
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -12,9 +14,9 @@ export default function NotificationSheet({ open, onOpenChange, onConfirmDisable
             <div className="mx-auto bg-red-500/10 p-4 rounded-full mb-2 w-fit">
                 <IconBell className="h-8 w-8 text-red-500" />
             </div>
-            <SheetTitle className="text-xl">¿Desactivar Notificaciones?</SheetTitle>
+            <SheetTitle className="text-xl">{t("settings.notification_sheet.title")}</SheetTitle>
             <SheetDescription>
-                Te perderás recordatorios de entrenamiento, actualizaciones de ranking y avisos de seguridad.
+                {t("settings.notification_sheet.description")}
             </SheetDescription>
         </SheetHeader>
 
@@ -23,7 +25,7 @@ export default function NotificationSheet({ open, onOpenChange, onConfirmDisable
             <div className="p-4 bg-secondary/50 rounded-xl border border-border/50 flex items-start gap-3">
                  <IconAlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                  <p className="text-xs text-muted-foreground text-left">
-                    Oxyra utiliza el correo solo para información vital sobre tu progreso y cuenta. No enviamos spam.
+                    {t("settings.notification_sheet.security_note")}
                  </p>
             </div>
 
@@ -34,7 +36,7 @@ export default function NotificationSheet({ open, onOpenChange, onConfirmDisable
                     onClick={onConfirmDisable}
                     disabled={loading}
                 >
-                    {loading ? "Desactivando..." : "Sí, desactivar notificaciones"}
+                    {loading ? t("settings.notification_sheet.disabling") : t("settings.notification_sheet.confirm")}
                 </Button>
                 
                 <Button 
@@ -43,7 +45,7 @@ export default function NotificationSheet({ open, onOpenChange, onConfirmDisable
                     onClick={() => onOpenChange(false)}
                     disabled={loading}
                 >
-                    Cancelar (Mantener activadas)
+                    {t("settings.notification_sheet.cancel")}
                 </Button>
             </div>
         </div>

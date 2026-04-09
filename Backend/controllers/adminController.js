@@ -1,9 +1,10 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
+const notifController = require('./notificationController');
 
-// ============================================================
+// 
 //  LOG STORE EN MEMORIA (funciona sin BD adicional)
-// ============================================================
+// 
 const MAX_LOGS = 200;
 const actionLogs = [];
 
@@ -20,9 +21,11 @@ function addLog(level, category, message, user = 'system', meta = {}) {
     if (actionLogs.length > MAX_LOGS) actionLogs.pop();
 }
 
-// ============================================================
+
+
+// 
 //  STATS GENERALES (Overview Dashboard)
-// ============================================================
+// 
 exports.getStats = async (req, res) => {
     try {
         const [[{ totalUsers }]]  = await db.query("SELECT COUNT(*) AS totalUsers FROM usuarios");
@@ -63,9 +66,9 @@ exports.getStats = async (req, res) => {
     }
 };
 
-// ============================================================
+// 
 //  GESTIÓN DE USUARIOS
-// ============================================================
+// 
 exports.getAllUsers = async (req, res) => {
     try {
         const [users] = await db.query(
@@ -80,6 +83,10 @@ exports.getAllUsers = async (req, res) => {
 exports.createUser = async (req, res) => {
     const { nombre_completo, username, email, password, rol } = req.body;
     try {
+        if (!nombre_completo || !username || !email || !password) {
+            return res.status(400).json({ error: "Todos los campos son obligatorios." });
+        }
+
         const [exists] = await db.query("SELECT idUsuario FROM usuarios WHERE email = ? OR username = ?", [email, username]);
         if (exists.length > 0) return res.status(400).json({ error: "Email o Username ya registrados" });
 
@@ -123,9 +130,9 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
-// ============================================================
+// 
 //  GESTIÓN DE EJERCICIOS
-// ============================================================
+// 
 const VALID_MUSCLES = [
     'Pecho', 'Espalda Alta', 'Espalda Media', 'Espalda Baja', 'Hombro',
     'Cuadriceps', 'Femoral', 'Gluteo', 'Gemelo', 'Aductores',
@@ -195,9 +202,9 @@ exports.deleteExercise = async (req, res) => {
     }
 };
 
-// ============================================================
+// 
 //  LOGS DE SISTEMA
-// ============================================================
+// 
 exports.getLogs = async (req, res) => {
     const { level, category, limit = 100 } = req.query;
     let filtered = [...actionLogs];

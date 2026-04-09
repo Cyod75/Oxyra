@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { API_URL } from "../../../config/api";
 import BackButton from "../../../components/shared/BackButton";
 import UserListItem from "../../../components/shared/UserListItem";
 import { IconUsers, IconLoader } from "../../../components/icons/Icons";
 
 export default function UserConnectionsPage({ type }) {
+  const { t } = useTranslation();
   const { username } = useParams();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const title = type === "followers" ? "Seguidores" : "Seguidos";
+  const title = type === "followers" ? t("connections.followers") : t("connections.following");
 
   useEffect(() => {
     fetchConnections();
@@ -39,7 +41,10 @@ export default function UserConnectionsPage({ type }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* HEADER STICKY GLASSMORPHISM */}
-      <div className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-border/10 h-14 flex items-center justify-between px-4">
+      <div 
+        className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-border/10 flex items-center justify-between px-4 pb-1"
+        style={{ paddingTop: 'calc(0.5rem + var(--safe-area-top))', height: 'calc(3.5rem + var(--safe-area-top))' }}
+      >
         {/* Izquierda: Back Button */}
         <div className="w-10">
           <BackButton />
@@ -67,8 +72,8 @@ export default function UserConnectionsPage({ type }) {
             </div>
             <p className="text-sm text-muted-foreground">
               {type === "followers"
-                ? "Aún no hay seguidores"
-                : "Aún no sigue a nadie"}
+                ? t("connections.no_followers_yet")
+                : t("connections.no_following_yet")}
             </p>
           </div>
         ) : (
@@ -83,3 +88,4 @@ export default function UserConnectionsPage({ type }) {
     </div>
   );
 }
+

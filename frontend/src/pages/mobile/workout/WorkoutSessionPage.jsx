@@ -1,16 +1,22 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { IconBackArrow, IconLoader, IconCheck, IconX } from "../../../components/icons/Icons";
 import { Button } from "@/components/ui/button";
 import ExerciseUnitView from "./components/ExerciseUnitView";
 import RestTimerOverlay from "./components/RestTimerOverlay";
 import { API_URL } from '../../../config/api';
+import { scheduleRestTimer, cancelRestTimer, notifyWorkoutDone, vibrateAlert } from "../../../utils/notifications";
+import { oxyAlert, oxyConfirm } from "../../../utils/customAlert";
+import CancelReasonSheet from "./components/CancelReasonSheet";
 
 export default function WorkoutSessionPage() {
+  const { t } = useTranslation();
   const { routineId } = useParams();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);
+  const [showCancelReason, setShowCancelReason] = useState(false);
   const [routineMeta, setRoutineMeta] = useState(null);
   const [workoutData, setWorkoutData] = useState([]);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
@@ -20,6 +26,53 @@ export default function WorkoutSessionPage() {
   const [restTimeLeft, setRestTimeLeft] = useState(0);
   const timerRef = useRef(null);
   const startTimeRef = useRef(new Date());
+
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const saved = localStorage.getItem('oxyra_rest_sound_enabled');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('oxyra_rest_sound_enabled', soundEnabled);
+  }, [soundEnabled]);
+
+  const playAlert = () => {
+    if (soundEnabled) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+        
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(1, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime + 0.15);
+        
+        gainNode.gain.setValueAtTime(1, audioCtx.currentTime + 0.25);
+        gainNode.gain.setValueAtTime(1, audioCtx.currentTime + 0.35);
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime + 0.4);
+        
+        gainNode.gain.setValueAtTime(1, audioCtx.currentTime + 0.5);
+        gainNode.gain.setValueAtTime(1, audioCtx.currentTime + 0.7);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 1.2);
+      } catch (e) {
+        console.error("Audio playback error:", e);
+      }
+    } else {
+      if (navigator.vibrate) {
+        navigator.vibrate([300, 100, 300, 100, 300]);
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchRoutineData = async () => {
@@ -63,7 +116,7 @@ export default function WorkoutSessionPage() {
         }
       } catch (error) {
         console.error("Error fetching routine:", error);
-        alert("Error al cargar la rutina");
+        await oxyAlert(t("workout_session.error_loading"));
         navigate(-1);
       } finally {
         setLoading(false);
@@ -79,14 +132,22 @@ export default function WorkoutSessionPage() {
       }, 1000);
     } else if (restTimeLeft <= 0 && isResting) {
       setIsResting(false);
+      vibrateAlert();  // Vibración de alerta: 3 pulsos + 1 largo
+      playAlert();     // Sonido de beep (si está activado)
     }
     return () => clearTimeout(timerRef.current);
-  }, [isResting, restTimeLeft]);
+  }, [isResting, restTimeLeft, soundEnabled]);
 
   const triggerRestTimer = (duration) => {
     setRestDuration(duration);
     setRestTimeLeft(duration);
     setIsResting(true);
+    scheduleRestTimer(duration); // Programa la notificación nativa
+  };
+
+  const cancelTimer = () => {
+    setIsResting(false);
+    cancelRestTimer(); // Cancela la notificación nativa
   };
 
   const handleNextExercise = () => {
@@ -102,7 +163,7 @@ export default function WorkoutSessionPage() {
   };
 
   const handleFinishWorkout = async () => {
-    if (!window.confirm("¿Finalizar entrenamiento y guardar?")) return;
+    if (!(await oxyConfirm(t("workout_session.confirm_finish")))) return;
     setLoading(true);
 
     const endTime = new Date();
@@ -127,16 +188,35 @@ export default function WorkoutSessionPage() {
         });
 
         if (res.ok) {
+            // Cuenta regresiva de series completadas
+            let totalSeries = 0;
+            workoutData.forEach(ej => {
+                totalSeries += ej.performedSets.filter(s => s.completed).length;
+            });
+            notifyWorkoutDone(Math.round(durationSeconds / 60), totalSeries);
             navigate('/');
         } else {
-            alert("Error al guardar el entrenamiento.");
+            await oxyAlert(t("workout_session.error_saving"));
         }
     } catch (error) {
         console.error("Error saving workout:", error);
-        alert("Error de conexión al guardar.");
+        await oxyAlert(t("workout_session.connection_error_saving"));
     } finally {
         setLoading(false);
     }
+  };
+
+  const handleExit = async () => {
+    if (await oxyConfirm(t("workout_session.confirm_exit"))) {
+        setShowCancelReason(true);
+    }
+  };
+
+  const handleCancelConfirm = (reason) => {
+      // You can send 'reason' to a backend/analytics here
+      console.log("Motivo de cancelación:", reason);
+      setShowCancelReason(false);
+      navigate(-1);
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-background"><IconLoader className="animate-spin w-8 h-8 text-primary"/></div>;
@@ -146,18 +226,21 @@ export default function WorkoutSessionPage() {
 
   return (
     <div className="h-screen flex flex-col bg-background relative overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-background/95 backdrop-blur-sm z-10">
-        <button onClick={() => window.confirm("¿Salir sin guardar?") && navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors">
+      <div 
+        className="flex items-center justify-between px-4 pb-3 border-b border-border/40 bg-background/95 backdrop-blur-sm z-10"
+        style={{ paddingTop: 'calc(0.75rem + var(--safe-area-top))' }}
+      >
+        <button onClick={handleExit} className="text-muted-foreground hover:text-foreground transition-colors">
           <IconX className="w-6 h-6" />
         </button>
         <div className="text-center">
              <h2 className="text-sm font-bold text-foreground w-48 truncate">{currentExercise.nombre}</h2>
              <p className="text-xs text-muted-foreground">
-                Ejercicio {currentExerciseIndex + 1} de {workoutData.length}
+                {t("workout_session.exercise_of", { current: currentExerciseIndex + 1, total: workoutData.length })}
              </p>
         </div>
         <Button size="sm" variant="ghost" className="text-primary font-bold" onClick={handleFinishWorkout}>
-            Finalizar
+            {t("workout_session.finish")}
         </Button>
       </div>
 
@@ -177,7 +260,7 @@ export default function WorkoutSessionPage() {
                 onClick={handlePrevExercise}
                 disabled={currentExerciseIndex === 0}
             >
-                Anterior
+                {t("workout_session.prev")}
             </Button>
 
             {isLastExercise ? (
@@ -185,14 +268,14 @@ export default function WorkoutSessionPage() {
                     className="flex-[2] rounded-full font-bold bg-green-500 hover:bg-green-600 text-white"
                     onClick={handleFinishWorkout}
                 >
-                    Terminar Rutina <IconCheck className="w-5 h-5 ml-2"/>
+                    {t("workout_session.finish_routine")} <IconCheck className="w-5 h-5 ml-2"/>
                 </Button>
             ) : (
                 <Button 
                     className="flex-[2] rounded-full font-bold"
                     onClick={handleNextExercise}
                 >
-                    Siguiente Ejercicio
+                    {t("workout_session.next_exercise")}
                 </Button>
             )}
        </div>
@@ -201,8 +284,16 @@ export default function WorkoutSessionPage() {
           isResting={isResting}
           timeLeft={restTimeLeft}
           totalTime={restDuration}
-          onCancel={() => setIsResting(false)}
-          onAddSeconds={(secs) => setRestTimeLeft(prev => prev + secs)}
+          onCancel={cancelTimer}
+          onAddSeconds={(secs) => {setRestTimeLeft(prev => prev + secs)}}
+          soundEnabled={soundEnabled}
+          onToggleSound={() => setSoundEnabled(prev => !prev)}
+       />
+
+       <CancelReasonSheet 
+          open={showCancelReason}
+          onOpenChange={setShowCancelReason}
+          onConfirm={handleCancelConfirm}
        />
     </div>
   );

@@ -1,15 +1,16 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { RANK_COLORS } from "@/config/ranksColors";
-import { PODIUM_COLORS } from "@/components/shared/ranksHelpers";
+import { PODIUM_COLORS, RANK_ICONS } from "@/components/shared/ranksHelpers";
 import { IconCrown } from "@/components/icons/Icons";
+import DefaultAvatar from "@/components/DefaultAvatar";
 
 function PodiumUser({ user, position, delay = 0 }) {
   const navigate = useNavigate();
   const colors = PODIUM_COLORS[position];
   const rankColor = RANK_COLORS[user.rango_global] || RANK_COLORS["Sin Rango"];
+  const rankIcon = RANK_ICONS[user.rango_global];
 
   const isFirst = position === 1;
   const avatarSize = isFirst ? "h-20 w-20" : "h-14 w-14";
@@ -42,12 +43,13 @@ function PodiumUser({ user, position, delay = 0 }) {
           boxShadow: `0 0 20px ${colors.glow}, 0 0 40px ${colors.glow}`
         }}
       >
-        <Avatar className={`${avatarSize} border-2 border-zinc-950`}>
-          <AvatarImage src={user.foto_perfil} className="object-cover" />
-          <AvatarFallback className="bg-zinc-800 text-zinc-400 font-bold text-sm">
-            {user.username?.substring(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <DefaultAvatar
+          userId={user.idUsuario ?? user.username}
+          name={user.nombre_completo || user.username}
+          src={user.foto_perfil}
+          size={avatarSize}
+          className="border-2 border-zinc-950 ring-0"
+        />
 
         {/* Número de posición */}
         <div
@@ -56,6 +58,13 @@ function PodiumUser({ user, position, delay = 0 }) {
         >
           {position}
         </div>
+
+        {/* Mini rank icon */}
+        {rankIcon && (
+          <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center">
+            <img src={rankIcon} alt={user.rango_global} className="w-4 h-4 object-contain" />
+          </div>
+        )}
       </div>
 
       {/* Username */}

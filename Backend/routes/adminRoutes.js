@@ -13,7 +13,10 @@ router.get('/stats', adminController.getStats);
 
 // --- USUARIOS ---
 router.get('/users', adminController.getAllUsers);
+
+// Ruta directa para crear usuarios
 router.post('/users', adminController.createUser);
+
 router.delete('/users/:id', adminController.deleteUser);
 
 // --- EJERCICIOS ---

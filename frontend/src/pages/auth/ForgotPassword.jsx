@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { IconBackArrow, IconCheck, IconX } from "../../components/icons/Icons";
 import { API_URL } from '../../config/api';
 
@@ -30,6 +31,7 @@ const FormInput = ({ label, icon, type, name, placeholder, value, onChange, extr
 );
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,10 +44,6 @@ export default function ForgotPassword() {
     setError("");
 
     try {
-      // 1. Check if email exists first (optional, but good UX)
-      // Actually, standard security practice is to just say "If email exists, code sent", 
-      // but user asked for validation "si existe o no".
-      
       const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,11 +53,10 @@ export default function ForgotPassword() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Error al enviar código");
+        throw new Error(data.error || t("auth.forgot_password.error_sending"));
       }
       
       setSuccess(true);
-      // Wait a bit then navigate
       setTimeout(() => {
           navigate("/verify-code", { state: { email } });
       }, 1500);
@@ -88,8 +85,8 @@ export default function ForgotPassword() {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">Recuperar Cuenta</h1>
-          <p className="text-zinc-400 text-base font-medium">Introduce tu correo para recibir un código de verificación.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">{t("auth.forgot_password.title")}</h1>
+          <p className="text-zinc-400 text-base font-medium">{t("auth.forgot_password.subtitle")}</p>
         </div>
 
         {error && (
@@ -102,20 +99,20 @@ export default function ForgotPassword() {
         {success && (
           <div className="bg-green-500/10 border border-green-500/20 text-green-200 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-3">
              <IconCheck className="w-5 h-5 text-green-500" />
-             Código enviado correctamente. Redirigiendo...
+             {t("auth.forgot_password.success_message")}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             
             <FormInput 
-                label="Correo Electrónico"
+                label={t("auth.forgot_password.email_label")}
                 icon={
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-5 h-5"><path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" /><path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" /></svg>
                 }
                 type="email"
                 name="email"
-                placeholder="tu@correo.com"
+                placeholder={t("auth.forgot_password.email_placeholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
             />
@@ -127,7 +124,7 @@ export default function ForgotPassword() {
             >
                 {loading ? (
                     <div className="w-6 h-6 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                ) : success ? "Enviado" : "Enviar Código"}
+                ) : success ? t("auth.forgot_password.sent") : t("auth.forgot_password.submit")}
             </button>
 
         </form>

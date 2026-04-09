@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { IconAlertTriangle, IconTrash, IconMail, IconCheckCircle } from "../../i
 import { API_URL } from '../../../config/api';
 
 export default function DeleteAccountSheet({ open, onOpenChange }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [code, setCode] = useState("");
@@ -23,7 +25,7 @@ export default function DeleteAccountSheet({ open, onOpenChange }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al enviar el código");
+      if (!res.ok) throw new Error(data.error || t("settings.delete_account_sheet.error_sending"));
       
       setStep(2);
     } catch (err) {
@@ -35,7 +37,7 @@ export default function DeleteAccountSheet({ open, onOpenChange }) {
 
   const handleDeleteAccount = async () => {
     if (code.length !== 6) {
-      setError("Introduce el código de 6 dígitos");
+      setError(t("settings.delete_account_sheet.error_digits"));
       return;
     }
     setLoading(true);
@@ -51,7 +53,7 @@ export default function DeleteAccountSheet({ open, onOpenChange }) {
         body: JSON.stringify({ code })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al eliminar la cuenta");
+      if (!res.ok) throw new Error(data.error || t("settings.delete_account_sheet.error_deleting"));
 
       setSuccess(true);
       setTimeout(() => {
@@ -90,9 +92,9 @@ export default function DeleteAccountSheet({ open, onOpenChange }) {
                 <IconTrash className="w-8 h-8 text-red-500" />
               </div>
               <div className="space-y-2">
-                <SheetTitle className="text-2xl font-black tracking-tight text-white">¿Eliminar cuenta?</SheetTitle>
+                <SheetTitle className="text-2xl font-black tracking-tight text-white">{t("settings.delete_account_sheet.title")}</SheetTitle>
                 <SheetDescription className="text-zinc-400 text-sm max-w-[280px]">
-                  Esta acción es permanente. Perderás todos tus registros, rutinas y seguidores de forma irreversible.
+                  {t("settings.delete_account_sheet.description")}
                 </SheetDescription>
               </div>
             </div>
@@ -106,7 +108,7 @@ export default function DeleteAccountSheet({ open, onOpenChange }) {
                 onClick={handleSendCode}
                 disabled={loading}
               >
-                {loading ? "Procesando..." : "Sí, enviar código al correo"}
+                {loading ? t("settings.delete_account_sheet.sending") : t("settings.delete_account_sheet.send_code")}
               </Button>
               <Button 
                 variant="ghost" 
@@ -114,7 +116,7 @@ export default function DeleteAccountSheet({ open, onOpenChange }) {
                 onClick={() => handleClose(false)}
                 disabled={loading}
               >
-                Cancelar
+                {t("settings.delete_account_sheet.cancel")}
               </Button>
             </div>
           </div>
@@ -126,12 +128,12 @@ export default function DeleteAccountSheet({ open, onOpenChange }) {
               </div>
               <div className="space-y-2">
                 <SheetTitle className="text-2xl font-black tracking-tight text-white">
-                  {success ? "¡Hasta pronto!" : "Verifica tu correo"}
+                  {success ? t("settings.delete_account_sheet.success_title") : t("settings.delete_account_sheet.verify_title")}
                 </SheetTitle>
                 <SheetDescription className="text-zinc-400 text-sm">
                   {success 
-                    ? "Tu cuenta ha sido eliminada correctamente. Gracias por haber formado parte de Oxyra."
-                    : "Hemos enviado un código de 6 dígitos para confirmar la eliminación definitiva."}
+                    ? t("settings.delete_account_sheet.success_description")
+                    : t("settings.delete_account_sheet.verify_description")}
                 </SheetDescription>
               </div>
             </div>
@@ -139,7 +141,7 @@ export default function DeleteAccountSheet({ open, onOpenChange }) {
             {!success && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 ml-1">Código de verificación</Label>
+                    <Label className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 ml-1">{t("settings.delete_account_sheet.verification_code")}</Label>
                     <div className="relative group">
                       <Input 
                         type="text" 
@@ -159,13 +161,13 @@ export default function DeleteAccountSheet({ open, onOpenChange }) {
                     onClick={handleDeleteAccount}
                     disabled={loading || code.length !== 6}
                   >
-                    {loading ? "Eliminando..." : "Confirmar Eliminación Final"}
+                    {loading ? t("settings.delete_account_sheet.deleting") : t("settings.delete_account_sheet.confirm_delete")}
                   </Button>
                   <button 
                      className="w-full text-zinc-500 text-xs font-bold uppercase tracking-widest hover:text-zinc-300 transition-colors py-2"
                      onClick={() => setStep(1)}
                   >
-                    Volver atrás
+                    {t("settings.delete_account_sheet.back")}
                   </button>
                 </div>
             )}

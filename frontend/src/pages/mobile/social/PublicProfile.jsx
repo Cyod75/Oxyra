@@ -3,12 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { API_URL } from '../../../config/api';
 // Reutilizamos tus iconos
 import { IconBackArrow, IconUserPlus, IconCheck, IconSettings } from "../../../components/icons/Icons";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { IconLoader } from "../../../components/icons/Icons";
 
-const DEFAULT_AVATAR = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+import DefaultAvatar from "../../../components/DefaultAvatar";
+import { oxyAlert } from "../../../utils/customAlert";
 
 export default function PublicProfile() {
   const { username } = useParams(); // Capturamos el username de la URL
@@ -68,7 +68,7 @@ export default function PublicProfile() {
       } catch (err) { console.log("Compartir cancelado"); }
     } else {
       navigator.clipboard.writeText(url);
-      alert("Enlace copiado al portapapeles");
+      await oxyAlert("Enlace copiado al portapapeles");
     }
   };
 
@@ -95,12 +95,14 @@ export default function PublicProfile() {
       {/* INFO PERFIL (Estilo Oxyra) */}
       <div className="px-4 mt-4 mb-6">
         <div className="flex items-center gap-6">
-           <Avatar className="h-24 w-24 border-2 border-background ring-2 ring-border/20 shadow-xl">
-              <AvatarImage src={profile.foto_perfil || DEFAULT_AVATAR} className="object-cover" />
-              <AvatarFallback className="text-2xl font-bold bg-secondary">
-                 {profile.nombre?.[0]}
-              </AvatarFallback>
-           </Avatar>
+           <DefaultAvatar 
+               userId={profile.idUsuario ?? profile.username} 
+               name={profile.nombre_completo || profile.nombre}
+               src={profile.foto_perfil} 
+               size="h-24 w-24"
+               className="border-2 border-background ring-2 ring-border/20 shadow-xl"
+               muscularStats={profile.muscularStats}
+           />
 
            <div className="flex-1 flex flex-col gap-3">
               <div className="flex flex-col">

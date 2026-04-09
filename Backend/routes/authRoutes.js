@@ -12,13 +12,19 @@ const validar = (req, res, next) => {
     next();
 };
 
-// Ruta de Registro con Validaciones
+// Ruta de Registro con Validaciones (Paso 1: enviar código)
 router.post('/register', [
     check('email', 'El email no es válido').isEmail(),
     check('username', 'El nombre de usuario es obligatorio').not().isEmpty(),
     check('password', 'La contraseña debe tener al menos 6 caracteres').isLength({ min: 6 }),
     validar
 ], authController.register);
+
+// Verificación de registro (Paso 2: verificar código + crear usuario + auto-login)
+router.post('/verify-registration', authController.verifyRegistration);
+
+// Reenviar código de verificación de registro
+router.post('/resend-verification', authController.resendVerification);
 
 router.post('/login', authController.login);
 router.post('/google-login', authController.googleLogin);

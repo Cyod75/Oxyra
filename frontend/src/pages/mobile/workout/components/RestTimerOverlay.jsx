@@ -1,7 +1,9 @@
 import React from "react";
-import { IconTimer, IconX, IconPlus } from "../../../../components/icons/Icons";
+import { useTranslation } from "react-i18next";
+import { IconTimer, IconX, IconPlus, IconSound, IconSoundOff } from "../../../../components/icons/Icons";
 
-export default function RestTimerOverlay({ isResting, timeLeft, totalTime, onCancel, onAddSeconds }) {
+export default function RestTimerOverlay({ isResting, timeLeft, totalTime, onCancel, onAddSeconds, soundEnabled, onToggleSound }) {
+  const { t } = useTranslation();
   
   if (!isResting) return null; // No renderizar si no está descansando
 
@@ -29,12 +31,19 @@ export default function RestTimerOverlay({ isResting, timeLeft, totalTime, onCan
                     <IconTimer className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                    <p className="text-xs font-bold text-primary uppercase tracking-wider mb-0.5">Descanso</p>
+                    <p className="text-xs font-bold text-primary uppercase tracking-wider mb-0.5">{t("workout_session.rest.title")}</p>
                     <p className="text-3xl font-black tracking-tight font-mono">{formattedTime}</p>
                 </div>
             </div>
             
             <div className="flex items-center gap-2">
+                <button 
+                    onClick={onToggleSound}
+                    className={`p-2 rounded-full transition-colors flex items-center justify-center ${soundEnabled ? 'bg-primary/20 text-primary hover:bg-primary/30' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}
+                    title={soundEnabled ? t("workout_session.rest.sound_off_hint") : t("workout_session.rest.sound_on_hint")}
+                >
+                    {soundEnabled ? <IconSound className="w-5 h-5" /> : <IconSoundOff className="w-5 h-5" />}
+                </button>
                 <button 
                     onClick={() => onAddSeconds(30)}
                     className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors flex items-center text-xs font-bold px-3"

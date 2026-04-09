@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { IconCheck } from "../../../../components/icons/Icons";
 
@@ -16,6 +17,7 @@ import { IconCheck } from "../../../../components/icons/Icons";
  *  - baseUrl: string (ruta base del directorio de imágenes, ej: .../Crunches/)
  */
 export default function ExerciseInfoSheet({ open, onOpenChange, exerciseName, baseUrl }) {
+  const { t } = useTranslation();
   
   // --- SIMULADOR DE GIF: alterna entre frame 0 y 1 ---
   const [frame, setFrame] = useState(0);
@@ -69,25 +71,25 @@ export default function ExerciseInfoSheet({ open, onOpenChange, exerciseName, ba
             </div>
           ) : (
             <div className="w-full aspect-[4/3] rounded-2xl bg-zinc-900/30 flex items-center justify-center mb-6 border border-border/30">
-              <span className="text-muted-foreground text-sm">Sin imagen disponible</span>
+              <span className="text-muted-foreground text-sm">{t("workout_session.exercise_info.no_image")}</span>
             </div>
           )}
 
           {/* === TIPS DE TÉCNICA === */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-widest text-primary">
-              Tips de Técnica
+              {t("workout_session.exercise_info.technique_tips")}
             </h3>
             
             <div className="space-y-3">
               <TipItem 
-                text="Mantén la espalda recta y el core activado durante todo el movimiento para proteger tu columna."
+                text={t("workout_session.exercise_info.tip_1")}
               />
               <TipItem 
-                text="Controla la fase excéntrica (bajada) durante 2-3 segundos para maximizar la tensión muscular."
+                text={t("workout_session.exercise_info.tip_2")}
               />
               <TipItem 
-                text="Exhala durante el esfuerzo (fase concéntrica) e inhala durante el retorno. Una respiración correcta mejora el rendimiento."
+                text={t("workout_session.exercise_info.tip_3")}
               />
             </div>
           </div>

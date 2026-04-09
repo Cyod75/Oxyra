@@ -11,7 +11,10 @@ const SheetTrigger = SheetPrimitive.Trigger
 
 const SheetClose = SheetPrimitive.Close
 
-const SheetPortal = SheetPrimitive.Portal
+const SheetPortal = ({ container, ...props }) => {
+  const customContainer = typeof document !== "undefined" ? document.getElementById("oxyra-center-container") : null;
+  return <SheetPrimitive.Portal container={container || customContainer || undefined} {...props} />;
+};
 
 const SheetOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IconCheck, IconX, IconLoader, IconHeart } from "../../icons/Icons"; 
 import { API_URL } from '../../../config/api';
+import DefaultAvatar from "../../DefaultAvatar";
 
 export default function FollowRequestsSheet({ open, onOpenChange, onUpdate }) {
+  const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null); 
@@ -73,9 +75,9 @@ export default function FollowRequestsSheet({ open, onOpenChange, onUpdate }) {
         
         {/* HEADER */}
         <SheetHeader className="mb-6 mt-6 text-left space-y-1">
-            <SheetTitle className="text-2xl font-black italic tracking-tighter">ACTIVIDAD</SheetTitle>
+            <SheetTitle className="text-2xl font-black italic tracking-tighter">{t("settings.activity_sheet.title")}</SheetTitle>
             <SheetDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Solicitudes y notificaciones
+                {t("settings.activity_sheet.subtitle")}
             </SheetDescription>
         </SheetHeader>
 
@@ -84,28 +86,31 @@ export default function FollowRequestsSheet({ open, onOpenChange, onUpdate }) {
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
                     <IconLoader className="animate-spin w-8 h-8 text-primary" />
-                    <span className="text-[10px] uppercase tracking-widest font-medium">Cargando actividad...</span>
+                    <span className="text-[10px] uppercase tracking-widest font-medium">{t("settings.activity_sheet.loading")}</span>
                 </div>
             ) : requests.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-4 text-muted-foreground opacity-40">
                     <IconHeart className="w-16 h-16" />
-                    <p className="text-xs font-black uppercase tracking-widest">Sin actividad reciente</p>
+                    <p className="text-xs font-black uppercase tracking-widest">{t("settings.activity_sheet.empty")}</p>
                 </div>
             ) : (
                 <div className="space-y-3">
                     {requests.map((req) => (
                         <div key={req.idUsuario} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-border/50 transition-all hover:bg-secondary/50">
                             <div className="flex items-center gap-3">
-                                <Avatar className="h-12 w-12 border border-border/50">
-                                    <AvatarImage src={req.foto_perfil} className="object-cover" />
-                                    <AvatarFallback>{req.username?.substring(0,2).toUpperCase()}</AvatarFallback>
-                                </Avatar>
+                                <DefaultAvatar
+                                    userId={req.idUsuario}
+                                    name={req.nombre_completo || req.username}
+                                    src={req.foto_perfil}
+                                    size="h-12 w-12"
+                                    className="border border-border/50 ring-0"
+                                />
                                 <div className="flex flex-col">
                                     <span className="font-bold text-base italic tracking-tight">{req.username}</span>
                                     {req.estado === 'pendiente' ? (
-                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Solicita seguirte</span>
+                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{t("settings.activity_sheet.requested_follow")}</span>
                                     ) : (
-                                        <span className="text-[10px] text-blue-400 font-bold uppercase tracking-wide animate-in fade-in slide-in-from-bottom-1 duration-500">Comenzó a seguirte</span>
+                                        <span className="text-[10px] text-blue-400 font-bold uppercase tracking-wide animate-in fade-in slide-in-from-bottom-1 duration-500">{t("settings.activity_sheet.started_following")}</span>
                                     )}
                                 </div>
                             </div>
