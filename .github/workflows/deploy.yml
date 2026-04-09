@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Clonar Repositorio
+      - name: Clonar repositorio
         uses: actions/checkout@v4
 
       - name: Configurar Node.js
@@ -19,15 +19,15 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Instalar Dependencias del Frontend
+      - name: Instalar dependencias
         working-directory: ./frontend
         run: npm install --legacy-peer-deps
 
-      - name: Compilar Frontend (Vite)
+      - name: Build frontend
         working-directory: ./frontend
         run: npm run build
 
-      - name: Subir Artefacto
+      - name: Subir artefacto
         uses: actions/upload-artifact@v4
         with:
           name: dist
@@ -45,7 +45,18 @@ jobs:
           name: dist
           path: dist
 
-      - name: Subir dist al VPS
+      - name: Crear carpeta destino en VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.IP }}
+          port: 2222
+          username: Jordi
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            mkdir -p /var/www/html/Oxyra/frontend/dist
+            chown -R Jordi:www-data /var/www/html/Oxyra/frontend
+
+      - name: Subir frontend al VPS
         uses: easingthemes/ssh-deploy@v2.2.11
         env:
           SSH_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
@@ -62,7 +73,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Ejecutar deploy backend por SSH
+      - name: Deploy backend por SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.IP }}
