@@ -1,6 +1,6 @@
-# ========================
+# 
 # Logs
-# ========================
+# 
 logs
 *.log
 npm-debug.log*
@@ -9,9 +9,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# ========================
+# 
 # Node / React
-# ========================
+# 
 # Root and workspace-installed node modules
 /node_modules/
 frontend/node_modules/
@@ -24,16 +24,18 @@ frontend/dist/
 frontend/dist-ssr/
 backend/dist/
 backend/dist-ssr/
+frontend/dev-dist/
+dev-dist/
 frontend/*.local
 
-# ========================
+# 
 # Backend
-# ========================
+# 
 backend/*.local
 
-# ========================
+# 
 # Editor directories and files
-# ========================
+# 
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -44,12 +46,15 @@ backend/*.local
 *.sln
 *.sw?
 
-# ========================
+android/
+
+# 
 # Claves / secretos
-# ========================
+# 
 ## Storage containing keys (private keys must NOT be committed)
 storage/
-
+BD/
+/legal-site/
 # Environment files (may contain secrets)
 .env
 .env.*

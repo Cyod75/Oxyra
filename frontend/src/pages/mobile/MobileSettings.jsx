@@ -1,188 +1,395 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Añadido useLocation
+import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "../../context/ThemeContext";
+import logoWhite from "../../assets/images/oxyra-white.png";
+import logoBlack from "../../assets/images/oxyra-black.png";
 
-// Componentes UI - Rutas relativas desde src/pages/mobile
+// UI Components
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+
+// Custom Components
+import SettingsSection from "../../components/settings/SettingsSection";
+import SettingsRow from "../../components/settings/SettingsRow";
 import ThemeController from "../../components/shared/ThemeController";
-import SettingsSection from "../../components/shared/SettingsSection";
-import SettingsRow from "../../components/shared/SettingsRow";
+
+// Sheets (Popups)
+import SecuritySheet from "../../components/settings/sheets/SecuritySheet";
+import SubscriptionSheet from "../../components/settings/sheets/SubscriptionSheet";
+import NotificationSheet from "../../components/settings/sheets/NotificationSheet";
+import DeleteAccountSheet from "../../components/settings/sheets/DeleteAccountSheet";
+import LanguageSheet from "../../components/settings/sheets/LanguageSheet";
+
+// Hooks
+import { useSubscription } from "../../hooks/useSubscription";
+import { useNotifications } from "../../hooks/useNotifications";
+import BackButton from "../../components/shared/BackButton";
 
 // Iconos
 import {
   IconBackArrow,
   IconUser,
   IconLock,
-  IconCrown,
   IconLogout,
   IconPalette,
   IconWeight,
-  IconTimer,
-  IconSound,
+  IconTrash,
+  IconBell,
+  IconEyeOff,
+  IconDoc,
+  IconGlobe,
   IconDiscord,
   IconInstagram,
-  IconHeart,
-  IconDoc,
-  IconTrash,
 } from "../../components/icons/Icons";
+
+import flagSpain from "../../assets/iconos/Flag_of_Spain.png";
+import flagUS from "../../assets/iconos/Flag_of_United_States.png";
+
+import { API_URL } from "../../config/api";
+
+// Icono de carga simple (Spinner)
+const Spinner = () => (
+  <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent text-muted-foreground" />
+);
 
 export default function MobileSettings() {
   const navigate = useNavigate();
-  const location = useLocation(); // Hook para leer el estado de navegación
-  const [weightUnit, setWeightUnit] = useState("kg");
+  const { isDark } = useTheme();
+  const { t, i18n } = useTranslation();
 
-  // Lógica de navegación robusta
-  const handleBack = () => {
-    // Si venimos de una ruta válida (ej: clic en icono header), volvemos ahí
-    if (location.state && location.state.from) {
-      navigate(location.state.from);
-    } else {
-      // Si el usuario refrescó (F5) o entró directo, vamos al Home para evitar bucles
-      navigate("/");
+  // -- HOOKS --
+  const {
+    isPro,
+    daysLeft,
+    loading: subLoading,
+    handleSubscribe,
+    handleCancel,
+  } = useSubscription();
+  const {
+    notificationsEnabled,
+    loading: notifLoading,
+    toggleNotifications,
+  } = useNotifications();
+
+  // Estados UI
+  const [weightUnit, setWeightUnit] = useState(
+    () => localStorage.getItem("oxyra_weight_unit") || "kg",
+  );
+
+  // Control de Sheets
+  const [showProfile, setShowProfile] = useState(false);
+  const [showSecurity, setShowSecurity] = useState(false);
+  const [showSubscription, setShowSubscription] = useState(false);
+  const [showNotificationConfirm, setShowNotificationConfirm] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [showLanguage, setShowLanguage] = useState(false);
+
+  // PRIVACIDAD
+  const [esPrivada, setEsPrivada] = useState(false);
+
+  React.useEffect(() => {
+    const fetchPrivacy = async () => {
+      const token = localStorage.getItem("authToken");
+      try {
+        // Reusing /me endpoint to get es_privada
+        const res = await fetch(`${API_URL}/api/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setEsPrivada(data.es_privada === 1);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchPrivacy();
+  }, []);
+
+  const handleTogglePrivate = async (val) => {
+    // Optimistic update
+    setEsPrivada(val);
+    const token = localStorage.getItem("authToken");
+    try {
+      const formData = new FormData();
+      formData.append("es_privada", val); 
+
+      await fetch(`${API_URL}/api/users/update`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` }, // No content-type for FormData
+        body: formData,
+      });
+    } catch (e) {
+      console.error(e);
+      setEsPrivada(!val); // Revert on error
     }
   };
 
-  const toggleWeightUnit = () => {
-    setWeightUnit((prev) => (prev === "kg" ? "lbs" : "kg"));
+  // L?gica del Click en Notificaciones (CORREGIDA)
+  const handleNotificationClick = () => {
+    // 1. BLOQUEO ANTI-SPAM: Si ya est? cargando, no hacemos nada
+    if (notifLoading) return;
+
+    if (notificationsEnabled) {
+      // Si est?n activas, queremos desactivar -> MOSTRAR POPUP
+      setShowNotificationConfirm(true);
+    } else {
+      // Si est?n desactivadas, activar directamente
+      toggleNotifications(true);
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-base-100 text-base-content">
-      {/* --- HEADER SETTINGS --- */}
-      <header className="fixed top-0 left-0 w-full bg-base-100 border-b border-base-200 z-50 h-16 flex items-center justify-center px-4">
-        <button
-          onClick={handleBack}
-          className="btn btn-ghost btn-circle btn-sm absolute left-4"
-          aria-label="Volver"
-        >
-          <IconBackArrow />
-        </button>
-        <h1 className="text-xl font-bold">Configuración</h1>
+    <div className="flex flex-col h-screen bg-background text-foreground animate-in fade-in duration-300 relative">
+      {/* HEADER */}
+      <header
+        className="fixed top-0 w-full glass z-50 flex items-end px-4 justify-between border-b border-border/40"
+        style={{
+          paddingTop: "var(--safe-area-top)",
+          height: "calc(3.5rem + var(--safe-area-top))",
+        }}
+      >
+        <div className="flex items-center gap-2 h-14">
+          <BackButton />
+          <h1 className="text-lg font-bold tracking-tight">{t("settings.title")}</h1>
+        </div>
       </header>
 
-      {/* --- CONTENIDO --- */}
-      <main className="grow pt-20 px-4 pb-10 space-y-6 overflow-y-auto">
-        {/* 1. SECCIÓN CUENTA */}
-        <SettingsSection title="Cuenta">
-          <SettingsRow
-            icon={<IconUser />}
-            label="Información de la cuenta"
-            subLabel="Nombre, Email, Foto"
-          />
-          <Divider />
-          <SettingsRow icon={<IconLock />} label="Cambiar contraseña" />
-          <Divider />
-          <SettingsRow
-            icon={<IconCrown />}
-            label="Tu Suscripción"
-            rightElement={
-              <span className="badge badge-primary badge-sm">Pro</span>
-            }
-          />
-          <Divider />
-          <SettingsRow
-            icon={<IconLogout />}
-            label="Cerrar Sesión"
-            isDestructive={true}
-            onClick={() => alert("Lógica de logout")}
-          />
-        </SettingsSection>
+      {/* CONTENIDO */}
+      <ScrollArea
+        className="h-full pb-6 w-full"
+        style={{ paddingTop: "calc(3.5rem + var(--safe-area-top))" }}
+      >
+        <div className="px-4 pt-6 pb-12">
+          <SettingsSection title={t("settings.account")}>
+            <SettingsRow
+              icon={
+                <img
+                  src={isPro ? logoWhite : (isDark ? logoWhite : logoBlack)}
+                  alt="Oxyra"
+                  className="w-5 h-5 object-contain"
+                  style={{ filter: isPro ? 'none' : (isDark ? 'none' : 'none') }}
+                />
+              }
+              label={isPro ? t("settings.manage_subscription") : t("settings.oxyra_pro")}
+              sub={
+                isPro
+                  ? (daysLeft > 0 ? t("settings.renew_in", { days: daysLeft }) : t("settings.active_subscription"))
+                  : t("settings.level_up")
+              }
+              iconClass={
+                isPro
+                  ? "bg-gradient-to-br from-blue-500 to-cyan-400 shadow-blue-500/30 shadow-sm"
+                  : (isDark ? "bg-secondary/80 border border-border/50" : "bg-secondary border border-border/40")
+              }
+              right={
+                isPro && (
+                  <Badge className="bg-blue-500 text-white border-0 hover:bg-blue-600">
+                    PRO
+                  </Badge>
+                )
+              }
+              onClick={() => setShowSubscription(true)}
+            />
+            <SettingsRow
+              icon={<IconUser />}
+              label={t("settings.personal_data")}
+              sub={t("settings.personal_data_sub")}
+              onClick={() => navigate("/settings/personal-data")}
+            />
 
-        {/* 2. SECCIÓN PERSONALIZACIÓN */}
-        <SettingsSection title="Personalización">
-          <div className="flex items-center justify-between p-4 hover:bg-base-100 transition duration-200 cursor-pointer">
-            <div className="flex items-center gap-3">
-              <span className="opacity-70">
-                <IconPalette />
-              </span>
-              <span className="font-medium">Tema Oscuro</span>
+            {/* CUENTA PRIVADA */}
+            <SettingsRow
+              icon={<IconEyeOff />}
+              label={t("settings.private_account")}
+              sub={t("settings.private_account_sub")}
+              iconClass={
+                esPrivada
+                  ? "bg-indigo-500 text-white"
+                  : "bg-indigo-500/10 text-indigo-500"
+              }
+              right={
+                <Switch
+                  checked={esPrivada}
+                  onCheckedChange={handleTogglePrivate}
+                />
+              }
+            />
+
+            <SettingsRow
+              icon={<IconLock />}
+              label={t("settings.security")}
+              sub={t("settings.change_password")}
+              onClick={() => setShowSecurity(true)}
+            />
+          </SettingsSection>
+
+          <SettingsSection title={t("settings.experience")}>
+            <div className="flex items-center justify-between p-4 transition-colors hover:bg-muted/50 border-b border-border/40 last:border-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-500/10 rounded-lg text-purple-500 shrink-0">
+                  <IconPalette className="h-5 w-5" />
+                </div>
+                <span className="font-medium text-sm">{t("settings.visual_theme")}</span>
+              </div>
+              <ThemeController />
             </div>
-            <ThemeController />
+
+            <SettingsRow
+              icon={<IconGlobe />}
+              label={t("settings.language")}
+              iconClass="bg-blue-500/10 text-blue-500"
+              onClick={() => setShowLanguage(true)}
+              right={
+                <div className="flex items-center gap-2 px-3 py-1 bg-muted/40 rounded-full border border-border/20 shadow-sm">
+                  <span className="text-xs font-semibold text-muted-foreground">{i18n.language === 'en' ? t("settings.english") : t("settings.spanish")}</span>
+                  <div className="w-5 h-[13px] rounded-[2px] overflow-hidden shadow-sm flex items-center justify-center border border-white/20 bg-black/10">
+                    <img 
+                      src={i18n.language === 'en' ? flagUS : flagSpain} 
+                      alt="Idioma" 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+              }
+            />
+
+            <SettingsRow
+              icon={<IconWeight />}
+              label={t("settings.weight_unit")}
+              iconClass="bg-emerald-500/10 text-emerald-500"
+              right={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const nu = weightUnit === "kg" ? "lbs" : "kg";
+                    setWeightUnit(nu);
+                    localStorage.setItem("oxyra_weight_unit", nu);
+                  }}
+                  className="h-7 px-3 text-xs font-mono border-muted-foreground/20 bg-transparent hover:bg-muted"
+                >
+                  {weightUnit.toUpperCase()}
+                </Button>
+              }
+            />
+
+            {/* ROW DE NOTIFICACIONES */}
+            <SettingsRow
+              icon={<IconBell />}
+              label={t("settings.notifications")}
+              // Cambia la opacidad si est? cargando para dar feedback visual
+              className={notifLoading ? "opacity-70 cursor-wait" : ""}
+              iconClass={
+                notificationsEnabled
+                  ? "bg-pink-500 text-white"
+                  : "bg-pink-500/10 text-pink-500"
+              }
+              onClick={handleNotificationClick}
+              right={
+                // 2. FEEDBACK VISUAL: Si carga mostramos spinner, si no el switch
+                notifLoading ? (
+                  <Spinner />
+                ) : (
+                  <Switch
+                    checked={notificationsEnabled}
+                    className="pointer-events-none"
+                  />
+                )
+              }
+            />
+          </SettingsSection>
+
+          <SettingsSection title={t("settings.legal")}>
+            <SettingsRow
+              icon={<IconDoc />}
+              label={t("settings.privacy_policy")}
+              onClick={() => window.open("#", "_blank")}
+            />
+            <SettingsRow
+              icon={<IconDoc />}
+              label={t("settings.terms")}
+              onClick={() => window.open("#", "_blank")}
+            />
+          </SettingsSection>
+
+          <SettingsSection title={t("settings.about_us")}>
+            <SettingsRow
+              icon={<IconDiscord className="w-5 h-5" />}
+              label={t("settings.discord")}
+              sub={t("settings.discord_sub")}
+              iconClass="bg-[#5865F2]/10 text-[#5865F2]"
+              onClick={() => window.open("#", "_blank")}
+            />
+            <SettingsRow
+              icon={<IconInstagram className="w-5 h-5" />}
+              label={t("settings.instagram")}
+              sub={t("settings.instagram_sub")}
+              iconClass="bg-[#E1306C]/10 text-[#E1306C]"
+              onClick={() => window.open("https://www.instagram.com/jmonteiro.05?igsh=bWc4dGF6ZGJqeDg3&utm_source=qr", "_blank")}
+            />
+          </SettingsSection>
+
+          <SettingsSection title={t("settings.danger_zone")}>
+            <SettingsRow
+              icon={<IconLogout />}
+              label={t("settings.logout")}
+              isDestructive
+              onClick={() => {
+                localStorage.removeItem("authToken");
+                navigate("/welcome");
+              }}
+            />
+            <SettingsRow
+              icon={<IconTrash />}
+              label={t("settings.delete_account")}
+              isDestructive
+              onClick={() => setShowDeleteAccount(true)}
+            />
+          </SettingsSection>
+
+          <div className="text-center space-y-1 pt-4 pb-10 opacity-50">
+            <p className="text-xs font-bold">Oxyra App</p>
+            <p className="text-[10px] text-muted-foreground">
+              v1.2.0 - Build 4502
+            </p>
           </div>
+        </div>
+      </ScrollArea>
 
-          <Divider />
+      {/* SHEETS */}
+      <SecuritySheet open={showSecurity} onOpenChange={setShowSecurity} />
+      <DeleteAccountSheet
+        open={showDeleteAccount}
+        onOpenChange={setShowDeleteAccount}
+      />
+      <LanguageSheet
+        open={showLanguage}
+        onOpenChange={setShowLanguage}
+      />
+      <SubscriptionSheet
+        open={showSubscription}
+        onOpenChange={setShowSubscription}
+        isPro={isPro}
+        daysLeft={daysLeft}
+        loading={subLoading}
+        onSubscribe={handleSubscribe}
+        onCancel={handleCancel}
+      />
 
-          <SettingsRow
-            icon={<IconWeight />}
-            label="Unidad de peso"
-            rightElement={
-              <button
-                onClick={toggleWeightUnit}
-                className="btn btn-xs btn-outline font-bold min-w-12"
-              >
-                {weightUnit.toUpperCase()}
-              </button>
-            }
-          />
-        </SettingsSection>
-
-        {/* 3. ENTRENAMIENTO */}
-        <SettingsSection title="Entrenamiento">
-          <SettingsRow
-            icon={<IconTimer />}
-            label="Descanso por defecto"
-            rightElement={
-              <span className="text-xs opacity-50 font-bold">2:00</span>
-            }
-          />
-          <Divider />
-          <SettingsRow
-            icon={<IconSound />}
-            label="Sonidos del temporizador"
-            rightElement={
-              <input
-                type="checkbox"
-                className="toggle toggle-primary toggle-sm"
-                defaultChecked
-              />
-            }
-          />
-        </SettingsSection>
-
-        {/* 4. COMUNIDAD */}
-        <SettingsSection title="Comunidad">
-          <SettingsRow
-            icon={<IconDiscord />}
-            label="Únete a nuestro Discord"
-            rightElement={
-              <span className="text-xs text-indigo-400 font-bold">Unirse</span>
-            }
-          />
-          <Divider />
-          <SettingsRow
-            icon={<IconInstagram />}
-            label="Síguenos"
-            subLabel="@oxyra.app"
-          />
-          <Divider />
-          <SettingsRow
-            icon={<IconHeart />}
-            label="Ayúdanos a mejorar"
-            subLabel="Enviar feedback"
-          />
-        </SettingsSection>
-
-        {/* 5. LEGAL */}
-        <SettingsSection title="Legal">
-          <SettingsRow icon={<IconDoc />} label="Política de Privacidad" />
-          <Divider />
-          <SettingsRow icon={<IconDoc />} label="Términos y Condiciones" />
-        </SettingsSection>
-
-        {/* 6. ZONA DE PELIGRO */}
-        <SettingsSection title="Zona de Peligro">
-          <SettingsRow
-            icon={<IconTrash />}
-            label="Eliminar Cuenta"
-            isDestructive={true}
-            onClick={() => alert("Lógica de eliminar cuenta")}
-          />
-        </SettingsSection>
-
-        <p className="text-center text-xs opacity-40 mt-4 pb-6">Oxyra v1.0.0</p>
-      </main>
+      <NotificationSheet
+        open={showNotificationConfirm}
+        onOpenChange={setShowNotificationConfirm}
+        loading={notifLoading}
+        onConfirmDisable={() => {
+          toggleNotifications(false).then(() =>
+            setShowNotificationConfirm(false),
+          );
+        }}
+      />
     </div>
   );
-}
-
-function Divider() {
-  return <div className="h-px bg-base-300 w-full"></div>;
 }
