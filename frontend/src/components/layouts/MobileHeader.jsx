@@ -1,38 +1,52 @@
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useTheme } from "../../hooks/useTheme"; // Importa tu hook limpio
-import { IconSettings } from "../icons/Icons"; // Importa el icono
-// Importamos las imágenes
-import logoBlack from "../../assets/images/logo-black.png";
-import logoWhite from "../../assets/images/logo-white.png";
+import { IconSettings, IconSearch } from "../icons/Icons";
+import OxyraLogo from "../shared/OxyraLogo";
 
 export default function MobileHeader() {
-  // Ahora la lógica es reactiva y moderna gracias al hook
-  const { isDark } = useTheme();
   const location = useLocation();
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-base-100 border-b border-base-300 z-50">
-      <div className="flex items-center justify-between px-4 py-3 text-base-content">
-        {/* IZQUIERDA: Logo */}
-        <Link to="/" className="flex items-center gap-3 select-none">
-          <img
-            src={isDark ? logoWhite : logoBlack}
-            alt="Oxyra logo"
-            className="w-9 h-9 object-contain"
-          />
-          <span className="text-lg font-semibold">Oxyra</span>
-        </Link>
+    <header
+      className="fixed top-0 left-0 w-full z-50 pointer-events-none bg-background/80 backdrop-blur-2xl border-b border-border/50 shadow-sm"
+      style={{ paddingTop: 'var(--safe-area-top)' }}
+    >
+      <div className="pointer-events-auto h-14">
+        <div className="flex items-center justify-between px-4 h-full text-foreground max-w-screen-xl mx-auto">
 
-        {/* DERECHA: Icono Ajustes */}
-        {/* IMPORTANTE: Guardamos "from" para saber a dónde volver */}
-        <Link
-          to="/settings"
-          state={{ from: location.pathname }}
-          aria-label="Ajustes"
-          className="p-2 active:scale-95 transition text-base-content flex items-center justify-center"
-        >
-          <IconSettings />
-        </Link>
+          {/* IZQUIERDA: Logo SVG */}
+          <Link
+            to="/"
+            className="flex items-center select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg
+                       text-foreground/75 hover:text-foreground transition-colors duration-200"
+            aria-label="Ir al inicio"
+          >
+            <OxyraLogo className="h-[22px] w-auto" />
+          </Link>
+
+          {/* DERECHA: Acciones (Buscar + Ajustes) */}
+          <nav className="flex items-center gap-1" aria-label="Menú superior">
+            {/* 1. BOTÓN BUSCAR */}
+            <Link
+              to="/search"
+              className="flex items-center justify-center p-2 rounded-full hover:bg-muted active:scale-95 transition-all text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label="Buscar"
+            >
+              <IconSearch className="w-5 h-5" />
+            </Link>
+
+            {/* 2. BOTÓN AJUSTES */}
+            <Link
+              to="/settings"
+              state={{ from: location.pathname }}
+              className="flex items-center justify-center p-2 rounded-full hover:bg-muted active:scale-95 transition-all text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label="Ajustes de la cuenta"
+            >
+              <IconSettings className="w-5 h-5" />
+            </Link>
+          </nav>
+
+        </div>
       </div>
     </header>
   );

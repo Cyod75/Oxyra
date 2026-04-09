@@ -1,27 +1,81 @@
-name: Deploy
+name: Oxyra Production Deployment
 
 on:
   push:
     branches:
-      - main  # Cambia por la rama que uses para deploy
+      - main
 
 jobs:
-  deploy:
-    name: Deploy to VPS
+  build_frontend:
+    name: 🏗️ Construir Frontend en GitHub
     runs-on: ubuntu-22.04
-
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.8
+      - name: Clonar Repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar Dependencias del Frontend
+        working-directory: ./frontend
+        run: npm i --legacy-peer-deps
+
+      - name: Compilar Frontend (Vite)
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Guardar Artefacto Compilado
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-folder
+          path: frontend/dist/
+          retention-days: 1
+
+  deploy_vps:
+    name: 🚀 Desplegar a VPS
+    needs: build_frontend 
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clonar Repositorio (Para el Backend)
+        uses: actions/checkout@v4
+
+      - name: Descargar Frontend Compilado
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-folder
+          path: build-artefacto
+
+      - name: Enviar Build Frontend al VPS (RSync)
+        uses: easingthemes/ssh-deploy@v2.2.11
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          ARGS: "-rlgoDzvc -i --delete"
+          SOURCE: "build-artefacto/"
+          REMOTE_HOST: "187.33.145.101"
+          REMOTE_USER: "Jordi"
+          REMOTE_PORT: "2222"
+          TARGET: "/var/www/html/Oxyra/frontend/dist"
+
+      - name: Actualizar y Reiniciar Backend en VPS
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.IP }}
           port: 2222
           username: Jordi
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            cd /var/www/html/Oxyra/
+            cd /var/www/html/Oxyra
+            # Actualizamos solo la parte backend
+            git config core.sparseCheckout true
             git reset --hard
-            git pull
-            cd frontend
-            npm install
-            npm run build
+            git pull origin main
+            
+            # Instalamos dependencias del backend sin devDependencies
+            cd backend
+            npm install --production
+            
+            # Asumiendo que usas PM2 para gestionar el backend, reiniciamos sin cortes de servicio
+            # Si el proceso se llama "oxyra-api" o "server" asegúrate de cambiarlo. 
+            pm2 reload all || pm2 restart all

@@ -1,39 +1,51 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-export const ThemeContext = createContext();
+// Creamos el contexto
+const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    try {
-      const savedTheme = localStorage.getItem("theme");
-      // Si hay tema guardado, úsalo
-      if (savedTheme) return savedTheme;
-      
-      // Si no, detecta preferencia del sistema
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return "sunset";
-      }
-      return "nord"; // Tema claro por defecto
-    } catch {
-      return "nord";
+    // 1. Miramos si hay algo guardado
+    if (typeof window !== "undefined" && localStorage.getItem("theme")) {
+      return localStorage.getItem("theme");
     }
+    // 2. Si no, miramos la preferencia del sistema
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark";
+    }
+    // 3. Por defecto oscuro (estilo Oxyra)
+    return "dark"; 
   });
 
   useEffect(() => {
-    // Aplica el tema al tag <html>
-    document.documentElement.setAttribute("data-theme", theme);
+    const root = window.document.documentElement;
+    // Quitamos clases antiguas para evitar conflictos
+    root.classList.remove("light", "dark");
+    // Añadimos la clase actual (necesario para shadcn)
+    root.classList.add(theme);
+    // Guardamos en local
     localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "nord" ? "sunset" : "nord"));
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
   const value = {
     theme,
     toggleTheme,
-    isDark: theme === "sunset",
+    isDark: theme === "dark",
   };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
+
+// --- AQUÍ ESTÁ LA SOLUCIÓN DEL ERROR ---
+// Exportamos el hook directamente desde aquí para que MobileSettings lo encuentre
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error("useTheme debe usarse dentro de un ThemeProvider");
+  }
+  return context;
+};
