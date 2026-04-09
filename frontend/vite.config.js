@@ -5,7 +5,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
 export default defineConfig({
-  base: '/Oxyra/',
+  start_url: '/Oxyra/',
+  scope: '/Oxyra/',
   plugins: [
     react(),
     svgr(),
