@@ -5,6 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
 export default defineConfig({
+  base: '/Oxyra/',
   plugins: [
     react(),
     svgr(),
@@ -23,8 +24,8 @@ export default defineConfig({
         short_name: 'Oxyra',
         description: 'Tu entrenador personal premium',
         
-        start_url: '/',
-        scope: '/',
+        start_url: '/Oxyra/',
+        scope: '/Oxyra/',
         display: 'standalone',
         orientation: 'portrait', // Bloquea rotación 
 
