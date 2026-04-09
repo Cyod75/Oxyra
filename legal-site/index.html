@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oxyra | Next-Generation Fitness Platform</title>
+  <meta name="description"
+    content="Intelligent workout management, AI-powered biometric body analysis and complete nutrition tracking.">
+  <link rel="icon" type="image/svg+xml" href="./images/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body data-lang="es">
+
+  <!-- ============================================================
+       HERO SECTION
+       ============================================================ -->
+  <section class="hero">
+    <!-- Ambient background -->
+    <div class="hero-bg"></div>
+    <div class="hero-grid-overlay"></div>
+
+    <!-- Language toggle (absolute positioned) -->
+    <div class="hero-lang-toggle">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-es">ES</button>
+        <button class="lang-btn" id="btn-en">EN</button>
+      </div>
+    </div>
+
+    <div class="hero-inner">
+      <!-- Text content -->
+      <div class="hero-content">
+        <img src="./images/header-logo-oxyra.svg" alt="Oxyra" class="hero-logo">
+
+        <!-- ES Headline -->
+        <h1 class="hero-headline lang-es">
+          <span class="line-1"><span class="line-inner">Desbloquea</span></span>
+          <span class="line-2"><span class="line-inner">tu máximo</span></span>
+          <span class="line-3"><span class="line-inner accent-word">Potencial</span></span>
+        </h1>
+
+        <!-- EN Headline -->
+        <h1 class="hero-headline lang-en">
+          <span class="line-1"><span class="line-inner">Unlock your</span></span>
+          <span class="line-2"><span class="line-inner">ultimate</span></span>
+          <span class="line-3"><span class="line-inner accent-word">Potential</span></span>
+        </h1>
+
+        <p class="hero-description lang-es">Plataforma de fitness de nueva generación que fusiona la gestión inteligente
+          de entrenamientos, análisis biométrico corporal con IA y seguimiento completo de nutrición.</p>
+        <p class="hero-description lang-en">Next-generation fitness platform that merges intelligent workout management,
+          AI-powered biometric body analysis and complete nutrition tracking.</p>
+
+        <!-- Stats -->
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="stat-number">10k+</span>
+            <span class="stat-label lang-es">Usuarios</span>
+            <span class="stat-label lang-en">Users</span>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-number">50k+</span>
+            <span class="stat-label lang-es">Rutinas</span>
+            <span class="stat-label lang-en">Workouts</span>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-number">2M+</span>
+            <span class="stat-label lang-es">Entrenamientos</span>
+            <span class="stat-label lang-en">Sessions</span>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-number">4.9★</span>
+            <span class="stat-label lang-es">Valoración</span>
+            <span class="stat-label lang-en">App Rating</span>
+          </div>
+        </div>
+
+        <!-- Store buttons -->
+        <div class="hero-store-buttons">
+          <a href="/Oxyra/" class="store-img-link btn-app-store" title="App Store" target="_blank">
+            <img src="./images/App_Store_Button.png" alt="Download on the App Store">
+          </a>
+          <a href="./downloads/oxyra-latest.apk" class="store-img-link btn-play-store" title="Google Play" download="oxyra-latest.apk">
+            <img src="./images/Play_Store_Button.png" alt="Get it on Google Play">
+          </a>
+        </div>
+      </div>
+
+      <!-- Phone visual -->
+      <div class="hero-visual">
+        <div class="hero-glow-ring"></div>
+
+        <!-- Main phone -->
+        <div class="phone-mockup" aria-hidden="true">
+          <div class="phone-notch"></div>
+          <div class="phone-screen has-image">
+            <img src="./images/screen_home_phone.png" alt="Oxyra Home Screen">
+          </div>
+        </div>
+      </div>
+    </div><!-- /hero-inner -->
+  </section>
+
+  <!-- ============================================================
+       STATS MARQUEE BAR
+       ============================================================ -->
+  <div class="stats-bar" aria-hidden="true">
+    <div class="stats-marquee-track">
+      <!-- Two identical sets for seamless loop -->
+      <div class="stats-marquee-item"><span class="stat-number">10k+</span><span class="stat-label lang-es">Usuarios
+          registrados</span><span class="stat-label lang-en">Registered users</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">50k+</span><span class="stat-label lang-es">Rutinas
+          creadas</span><span class="stat-label lang-en">Workouts created</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">2M+</span><span class="stat-label lang-es">Sesiones
+          completadas</span><span class="stat-label lang-en">Sessions completed</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">99.9%</span><span class="stat-label lang-es">Tiempo de actividad</span><span class="stat-label lang-en">Uptime</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">4.9★</span><span class="stat-label lang-es">Valoración App Store</span><span class="stat-label lang-en">App Store Rating</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">3min</span><span class="stat-label lang-es">Setup inicial</span><span class="stat-label lang-en">Initial setup</span></div>
+      <!-- Duplicate -->
+      <div class="stats-marquee-item"><span class="stat-number">10k+</span><span class="stat-label lang-es">Usuarios registrados</span><span class="stat-label lang-en">Registered users</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">50k+</span><span class="stat-label lang-es">Rutinas creadas</span><span class="stat-label lang-en">Workouts created</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">2M+</span><span class="stat-label lang-es">Sesiones completadas</span><span class="stat-label lang-en">Sessions completed</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">99.9%</span><span class="stat-label lang-es">Tiempo de actividad</span><span class="stat-label lang-en">Uptime</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">4.9★</span><span class="stat-label lang-es">Valoración App Store</span><span class="stat-label lang-en">App Store Rating</span></div>
+      <div class="stats-marquee-item"><span class="stat-number">3min</span><span class="stat-label lang-es">Setup inicial</span><span class="stat-label lang-en">Initial setup</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FEATURES SECTION
+       ============================================================ -->
+  <section id="features" class="features-section">
+    <div class="features-header reveal">
+      <div class="section-eyebrow lang-es">Funcionalidades principales</div>
+      <div class="section-eyebrow lang-en">Core Features</div>
+      <h2 class="section-heading lang-es">Todo lo que necesitas<br>para progresar</h2>
+      <h2 class="section-heading lang-en">Everything you need<br>to progress</h2>
+      <p class="section-subheading lang-es">Pasa el cursor o toca cada característica para explorarla.</p>
+      <p class="section-subheading lang-en">Hover or tap each feature to explore it.</p>
+    </div>
+
+    <div class="features-layout">
+      <!-- Sidebar tabs -->
+      <div class="feature-tabs reveal">
+        <div class="feature-tab active" data-feature="1" style="--feature-color: #6366f1;">
+          <div class="tab-icon">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none" />
+            </svg>
+          </div>
+          <div class="tab-text">
+            <h4 class="lang-es">Plan Personalizado</h4>
+            <h4 class="lang-en">Personalized Plan</h4>
+            <p class="lang-es">Rutinas 100% adaptadas a tus objetivos y equipo.</p>
+            <p class="lang-en">100% custom routines for your goals and gear.</p>
+          </div>
+        </div>
+
+        <div class="feature-tab" data-feature="2" style="--feature-color: #d946ef;">
+          <div class="tab-icon">
+            <svg viewBox="0 0 24 24">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+              <polyline points="17 6 23 6 23 12" />
+            </svg>
+          </div>
+          <div class="tab-text">
+            <h4 class="lang-es">Sobrecarga Automática</h4>
+            <h4 class="lang-en">Auto Overload</h4>
+            <p class="lang-es">El algoritmo ajusta cargas semana a semana.</p>
+            <p class="lang-en">Algorithm adjusts load week by week.</p>
+          </div>
+        </div>
+
+        <div class="feature-tab" data-feature="3" style="--feature-color: #10b981;">
+          <div class="tab-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+            </svg>
+          </div>
+          <div class="tab-text">
+            <h4 class="lang-es">Técnica Perfecta</h4>
+            <h4 class="lang-en">Flawless Form</h4>
+            <p class="lang-es">Videotutoriales y mapas de calor muscular.</p>
+            <p class="lang-en">Video tutorials and muscle heatmaps.</p>
+          </div>
+        </div>
+
+        <div class="feature-tab" data-feature="4" style="--feature-color: #f97316;">
+          <div class="tab-icon">
+            <svg viewBox="0 0 24 24">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+          </div>
+          <div class="tab-text">
+            <h4>Analytics Pro</h4>
+            <p class="lang-es">Estadísticas avanzadas de tu evolución completa.</p>
+            <p class="lang-en">Advanced stats on your full progress.</p>
+          </div>
+        </div>
+      </div><!-- /feature-tabs -->
+
+      <!-- Feature displays -->
+      <div class="feature-displays">
+
+        <!-- Display 1 -->
+        <div class="feature-display active" id="display-1" style="--feature-color: #6366f1;">
+          <div class="feature-mockup-wrapper">
+            <div class="feature-glow"></div>
+            <div class="feature-phone" aria-hidden="true">
+              <div class="feature-screen has-image">
+                <img src="./images/screen_plan_phone.png" alt="Oxyra Planning Screen">
+              </div>
+            </div>
+          </div>
+          <div class="display-info">
+            <h3 style="color: #6366f1" class="lang-es">Planificación 100% personalizada con un solo clic</h3>
+            <h3 style="color: #6366f1" class="lang-en">100% personalized planning in a single tap</h3>
+            <p class="lang-es">Construye tu rutina ideal basándonos en tu experiencia, objetivos y equipo disponible. Un
+              entorno diseñado para evolucionar contigo semana tras semana.</p>
+            <p class="lang-en">Build your ideal routine based on your experience, goals and available equipment. An
+              environment designed to evolve with you week after week.</p>
+          </div>
+        </div>
+
+        <!-- Display 2 -->
+        <div class="feature-display" id="display-2" style="--feature-color: #d946ef;">
+          <div class="feature-mockup-wrapper">
+            <div class="feature-glow"></div>
+            <div class="feature-phone" aria-hidden="true">
+              <div class="feature-screen has-image">
+                <img src="./images/screen_auto_phone.png" alt="Oxyra Auto Overload Screen">
+              </div>
+            </div>
+          </div>
+          <div class="display-info">
+            <h3 style="color: #d946ef" class="lang-es">Calculamos el peso ideal. Sobrecarga progresiva automática</h3>
+            <h3 style="color: #d946ef" class="lang-en">We calculate the ideal weight. Automatic progressive overload
+            </h3>
+            <p class="lang-es">El algoritmo de Oxyra aprende de cada sesión para ajustar series, repeticiones y carga.
+              Progresa de forma segura semana tras semana sin adivinar.</p>
+            <p class="lang-en">Oxyra's algorithm learns from every session to adjust sets, reps and weight. Progress
+              safely week after week without guessing.</p>
+          </div>
+        </div>
+
+        <!-- Display 3 -->
+        <div class="feature-display" id="display-3" style="--feature-color: #10b981;">
+          <div class="feature-mockup-wrapper">
+            <div class="feature-glow"></div>
+            <div class="feature-phone" aria-hidden="true">
+              <div class="feature-screen has-image">
+                <img src="./images/screen_technik_phone.png" alt="Oxyra Technique Screen">
+              </div>
+            </div>
+          </div>
+          <div class="display-info">
+            <h3 style="color: #10b981" class="lang-es">Domina la técnica de cada ejercicio a la perfección</h3>
+            <h3 style="color: #10b981" class="lang-en">Master the technique of every exercise perfectly</h3>
+            <p class="lang-es">Accede a tutoriales en vídeo y mapas de calor muscular que muestran qué músculos estás
+              usando realmente. Minimiza el riesgo de lesión y maximiza cada repetición.</p>
+            <p class="lang-en">Access video tutorials and muscle heatmaps showing exactly which muscles you're
+              activating. Minimize injury risk and maximize every rep.</p>
+          </div>
+        </div>
+
+        <!-- Display 4 -->
+        <div class="feature-display" id="display-4" style="--feature-color: #f97316;">
+          <div class="feature-mockup-wrapper">
+            <div class="feature-glow"></div>
+            <div class="feature-phone" aria-hidden="true">
+              <div class="feature-screen has-image">
+                <img src="./images/screen_ranks_phone.png" alt="Oxyra Analytics Screen">
+              </div>
+            </div>
+          </div>
+          <div class="display-info">
+            <h3 style="color: #f97316" class="lang-es">Estadísticas avanzadas. Aprende de tu progreso</h3>
+            <h3 style="color: #f97316" class="lang-en">Advanced analytics. Learn from your progress</h3>
+            <p class="lang-es">Un sistema de análisis en profundidad te permite descubrir tus puntos débiles corporales,
+              controlar tu diario completo y optimizar el descanso diario.</p>
+            <p class="lang-en">An in-depth analytics system lets you discover your physical weak points, track your full
+              diary, and optimize daily recovery.</p>
+          </div>
+        </div>
+
+      </div><!-- /feature-displays -->
+    </div><!-- /features-layout -->
+  </section>
+
+  <!-- ============================================================
+       AI BODY ANALYSIS SECTION
+       ============================================================ -->
+  <section class="ai-section">
+    <div class="ai-section-inner">
+      <!-- Visual -->
+      <div class="ai-visual reveal">
+        <!-- Glow backdrop -->
+        <div
+          style="position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(26,92,242,0.25) 0%,transparent 70%);filter:blur(60px);">
+        </div>
+
+        <!-- Mascot mascot_oxyra.png -->
+        <div class="ai-body-diagram">
+          <img src="./images/mascota_oxyra.png" alt="Oxyra Mascot" class="ai-mascot-img">
+
+          <!-- Scan line -->
+          <div class="muscle-overlay">
+            <div class="ai-scan-line"></div>
+          </div>
+
+          <!-- Glow dots on mascot muscular areas -->
+          <div class="muscle-group-dot" style="width:35px;height:35px;top:20%;left:25%;animation-delay:0s;"></div>
+          <div class="muscle-group-dot" style="width:30px;height:30px;top:25%;right:20%;animation-delay:0.5s;"></div>
+          <div class="muscle-group-dot" style="width:40px;height:40px;top:45%;left:50%;transform:translateX(-50%);animation-delay:1s;"></div>
+          <div class="muscle-group-dot" style="width:25px;height:25px;top:70%;left:30%;animation-delay:1.5s;"></div>
+          <div class="muscle-group-dot" style="width:25px;height:25px;top:70%;right:30%;animation-delay:0.8s;"></div>
+        </div>
+
+        <!-- Floating metrics card -->
+        <div class="ai-metrics-panel">
+          <div
+            style="font-family:var(--font-display);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--cyan);margin-bottom:0.6rem;"
+            class="lang-es">Análisis IA</div>
+          <div
+            style="font-family:var(--font-display);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--cyan);margin-bottom:0.6rem;"
+            class="lang-en">AI Analysis</div>
+          <div class="ai-metric-line"><span class="ai-metric-name lang-es">Pecho</span><span
+              class="ai-metric-name lang-en">Chest</span><span class="ai-metric-score">7.2</span></div>
+          <div class="ai-metric-line"><span class="ai-metric-name lang-es">Espalda</span><span
+              class="ai-metric-name lang-en">Back</span><span class="ai-metric-score">6.8</span></div>
+          <div class="ai-metric-line"><span class="ai-metric-name lang-es">Hombros</span><span
+              class="ai-metric-name lang-en">Shoulders</span><span class="ai-metric-score">5.9</span></div>
+          <div class="ai-metric-line"><span class="ai-metric-name lang-es">Cuádriceps</span><span
+              class="ai-metric-name lang-en">Quads</span><span class="ai-metric-score">8.1</span></div>
+          <div class="ai-metric-line"><span class="ai-metric-name lang-es">Bíceps</span><span
+              class="ai-metric-name lang-en">Biceps</span><span class="ai-metric-score">6.4</span></div>
+        </div>
+      </div><!-- /ai-visual -->
+
+      <!-- Text content -->
+      <div class="ai-content reveal reveal-delay-2">
+        <div class="section-eyebrow lang-es">Análisis con Inteligencia Artificial</div>
+        <div class="section-eyebrow lang-en">AI-Powered Analysis</div>
+        <h2 class="section-heading lang-es">Tu cuerpo,<br><span class="text-gradient">analizado en segundos</span></h2>
+        <h2 class="section-heading lang-en">Your body,<br><span class="text-gradient">analyzed in seconds</span></h2>
+        <p class="section-subheading lang-es">Sube una fotografía y el sistema de visión por computadora de Oxyra
+          analiza tus grupos musculares visibles, asigna puntuaciones de desarrollo y detecta desequilbrios. El
+          resultado: un plan de entrenamiento calibrado a tu cuerpo real, no a un avatar genérico.</p>
+        <p class="section-subheading lang-en">Upload a photo and Oxyra's computer vision system analyzes your visible
+          muscle groups, assigns development scores and detects imbalances. The result: a training plan calibrated to
+          your actual body, not a generic avatar.</p>
+
+        <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:2rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.85rem;color:var(--text-1);">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0;"></div>
+            <span class="lang-es">Procesado por modelo de visión IA con prompt especializado en fitness</span>
+            <span class="lang-en">Processed by AI vision model with a specialized fitness prompt</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.85rem;color:var(--text-1);">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0;"></div>
+            <span class="lang-es">Seguimiento de evolución corporal a lo largo del tiempo</span>
+            <span class="lang-en">Body composition tracking over time</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.85rem;color:var(--text-1);">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0;"></div>
+            <span class="lang-es">Uso voluntario — tus imágenes bajo tu control</span>
+            <span class="lang-en">Voluntary use — your images under your control</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TESTIMONIALS SECTION
+       ============================================================ -->
+  <section class="testimonials-section">
+    <div class="testimonials-header reveal">
+      <div class="section-eyebrow lang-es">Historias de éxito</div>
+      <div class="section-eyebrow lang-en">Success Stories</div>
+      <h2 class="section-heading lang-es">Resultados reales,<br>usuarios reales</h2>
+      <h2 class="section-heading lang-en">Real results,<br>real people</h2>
+    </div>
+
+    <div class="testimonials-track-wrapper">
+      <div class="testimonials-track">
+        <!-- Card 1 -->
+        <div class="testimonial-card">
+          <div class="testimonial-header">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#4F6EF7,#1e3a8a)">M</div>
+            <div class="user-info">
+              <h4>Marcos T.</h4><span class="user-handle">@marcos_fit</span>
+            </div>
+            <div class="rating">★★★★★</div>
+          </div>
+          <p class="testimonial-text lang-es">"La IA analizó mis fotos con una precisión brutal. Me di cuenta de que
+            tenía descompensada la espalda y, gracias a las métricas de Oxyra, en 3 meses he corregido mi postura y
+            ganado masa muscular limpia."</p>
+          <p class="testimonial-text lang-en">"The AI analyzed my photos with brutal precision. I realized my back was
+            imbalanced, and thanks to Oxyra's metrics, in 3 months I corrected my posture and gained clean muscle mass."
+          </p>
+        </div>
+        <!-- Card 2 -->
+        <div class="testimonial-card">
+          <div class="testimonial-header">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#f43f5e,#be123c)">L</div>
+            <div class="user-info">
+              <h4>Lucía G.</h4><span class="user-handle">@lucia_lifts</span>
+            </div>
+            <div class="rating">★★★★★</div>
+          </div>
+          <p class="testimonial-text lang-es">"He probado decenas de apps, pero Oxyra está en otra liga. Tener mis
+            comidas, calorías y entrenos en una interfaz oscura y profesional no tiene precio."</p>
+          <p class="testimonial-text lang-en">"I've tried dozens of apps, but Oxyra is in another league. Having all my
+            meals, calories, and workouts in one dark, professional interface is priceless."</p>
+        </div>
+        <!-- Card 3 -->
+        <div class="testimonial-card">
+          <div class="testimonial-header">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#10b981,#047857)">D</div>
+            <div class="user-info">
+              <h4>David R.</h4><span class="user-handle">@david_power</span>
+            </div>
+            <div class="rating">★★★★★</div>
+          </div>
+          <p class="testimonial-text lang-es">"Llevaba un año estancado. La plataforma analizó mis progresiones y ajustó
+            las cargas por mí. Rompí mi récord en sentadillas, y el diseño te incita a entrenar."</p>
+          <p class="testimonial-text lang-en">"I was stuck for a year. The platform analyzed my progressions and
+            adjusted the loads for me. I broke my squat PR, and the design makes you want to train."</p>
+        </div>
+        <!-- Card 4 (fictitious) -->
+        <div class="testimonial-card">
+          <div class="testimonial-header">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#f97316,#c2410c)">S</div>
+            <div class="user-info">
+              <h4>Sara M.</h4><span class="user-handle">@sara.strong</span>
+            </div>
+            <div class="rating">★★★★★</div>
+          </div>
+          <p class="testimonial-text lang-es">"El escáner de código de barras ha cambiado cómo llevo la nutrición. En
+            segundos tengo los macros exactos. Nunca pensé que registrar comidas pudiera ser tan rápido."</p>
+          <p class="testimonial-text lang-en">"The barcode scanner changed how I track nutrition. In seconds I have
+            exact macros. I never thought logging food could be this fast."</p>
+        </div>
+        <!-- Card 5 (fictitious) -->
+        <div class="testimonial-card">
+          <div class="testimonial-header">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#8b5cf6,#5b21b6)">J</div>
+            <div class="user-info">
+              <h4>Javier O.</h4><span class="user-handle">@javi_gains</span>
+            </div>
+            <div class="rating">★★★★★</div>
+          </div>
+          <p class="testimonial-text lang-es">"La sobrecarga automática es magia. Antes perdía tiempo calculando pesos,
+            ahora solo me preocupo de entrenar duro. Gané 8 kg de músculo en 5 meses."</p>
+          <p class="testimonial-text lang-en">"Auto overload is magic. I used to waste time calculating weights, now I
+            just focus on training hard. Gained 8kg of muscle in 5 months."</p>
+        </div>
+
+        <!-- Duplicates for seamless loop -->
+        <div class="testimonial-card">
+          <div class="testimonial-header">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#4F6EF7,#1e3a8a)">M</div>
+            <div class="user-info">
+              <h4>Marcos T.</h4><span class="user-handle">@marcos_fit</span>
+            </div>
+            <div class="rating">★★★★★</div>
+          </div>
+          <p class="testimonial-text lang-es">"La IA analizó mis fotos con una precisión brutal. Me di cuenta de que
+            tenía descompensada la espalda y, gracias a las métricas de Oxyra, en 3 meses he corregido mi postura y
+            ganado masa muscular limpia."</p>
+          <p class="testimonial-text lang-en">"The AI analyzed my photos with brutal precision. I realized my back was
+            imbalanced, and thanks to Oxyra's metrics, in 3 months I corrected my posture and gained clean muscle mass."
+          </p>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-header">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#f43f5e,#be123c)">L</div>
+            <div class="user-info">
+              <h4>Lucía G.</h4><span class="user-handle">@lucia_lifts</span>
+            </div>
+            <div class="rating">★★★★★</div>
+          </div>
+          <p class="testimonial-text lang-es">"He probado decenas de apps, pero Oxyra está en otra liga. Tener mis
+            comidas, calorías y entrenos en una interfaz oscura y profesional no tiene precio."</p>
+          <p class="testimonial-text lang-en">"I've tried dozens of apps, but Oxyra is in another league. Having all my
+            meals, calories, and workouts in one dark, professional interface is priceless."</p>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-header">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#10b981,#047857)">D</div>
+            <div class="user-info">
+              <h4>David R.</h4><span class="user-handle">@david_power</span>
+            </div>
+            <div class="rating">★★★★★</div>
+          </div>
+          <p class="testimonial-text lang-es">"Llevaba un año estancado. La plataforma analizó mis progresiones y ajustó
+            las cargas por mí. Rompí mi récord en sentadillas, y el diseño te incita a entrenar."</p>
+          <p class="testimonial-text lang-en">"I was stuck for a year. The platform analyzed my progressions and
+            adjusted the loads for me. I broke my squat PR, and the design makes you want to train."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       DOWNLOAD CTA SECTION
+       ============================================================ -->
+  <section id="download" class="download-section">
+    <div class="download-bg"></div>
+    <div class="download-inner">
+      <div class="section-eyebrow reveal" style="justify-content:center; margin-inline:auto; width:fit-content;">
+        <span class="lang-es">Disponible ahora</span>
+        <span class="lang-en">Available now</span>
+      </div>
+      <h2 class="download-headline reveal reveal-delay-1">
+        <span class="lang-es">Empieza hoy.</span>
+        <span class="lang-en">Start today.</span>
+        <span class="gradient-line lang-es">Gratis.</span>
+        <span class="gradient-line lang-en">Free.</span>
+      </h2>
+      <p class="download-sub reveal reveal-delay-2 lang-es">Sin suscripciones. Sin paywalls. Descarga Oxyra y lleva tu
+        entrenamiento al siguiente nivel desde el primer día.</p>
+      <p class="download-sub reveal reveal-delay-2 lang-en">No subscriptions. No paywalls. Download Oxyra and take your
+        training to the next level from day one.</p>
+      <div class="download-buttons reveal reveal-delay-3">
+        <a href="/Oxyra/" class="store-img-link btn-app-store" title="App Store" target="_blank">
+          <img src="./images/App_Store_Button.png" alt="Download on the App Store">
+        </a>
+        <a href="./downloads/oxyra-latest.apk" class="store-img-link btn-play-store" title="Google Play" download="oxyra-latest.apk">
+          <img src="./images/Play_Store_Button.png" alt="Get it on Google Play">
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TECH STACK
+       ============================================================ -->
+  <div class="tech-section">
+    <div class="tech-inner">
+      <span class="tech-label lang-es">Potenciado Por</span>
+      <span class="tech-label lang-en">Powered By</span>
+      <div class="tech-pills">
+        <span class="tech-pill">React Native / Capacitor</span>
+        <span class="tech-pill">Vite</span>
+        <span class="tech-pill">Node.js</span>
+        <span class="tech-pill">Express</span>
+        <span class="tech-pill">MySQL</span>
+        <span class="tech-pill">AI Vision Models</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div>
+        <img src="./images/header-logo-oxyra.svg" alt="Oxyra" class="footer-logo">
+        <p class="footer-tagline lang-es">La plataforma de fitness de nueva generación. Fusionando gestión inteligente
+          de entrenamiento con IA.</p>
+        <p class="footer-tagline lang-en">The next-generation fitness platform. Merging intelligent workout management
+          with AI.</p>
+        <div class="social-links">
+          <a href="#" aria-label="Discord">
+            <svg viewBox="0 0 24 24">
+              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.23 10.23 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.946-2.419 2.157-2.419 1.21 0 2.175 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" fill="currentColor"/>
+            </svg>
+          </a>
+          <a href="https://www.instagram.com/jmonteiro.05?igsh=bWc4dGF6ZGJqeDg3&utm_source=qr" target="_blank" aria-label="Instagram">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4 class="lang-es">Producto</h4>
+        <h4 class="lang-en">Product</h4>
+        <ul>
+          <li><a href="#features" class="lang-es">Características</a><a href="#features" class="lang-en">Features</a>
+          </li>
+          <li><a href="#download" class="lang-es">Descargar</a><a href="#download" class="lang-en">Download</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 class="lang-es">Legal</h4>
+        <h4 class="lang-en">Legal</h4>
+        <ul>
+          <li><a href="privacy.html" class="lang-es">Política de Privacidad</a><a href="privacy.html"
+              class="lang-en">Privacy Policy</a></li>
+          <li><a href="terms.html" class="lang-es">Términos y Condiciones</a><a href="terms.html" class="lang-en">Terms
+              & Conditions</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 class="lang-es">Contacto</h4>
+        <h4 class="lang-en">Contact</h4>
+        <ul>
+          <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=oxyra.gym@gmail.com" target="_blank">oxyra.gym@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Oxyra &middot; Jordi M. Monteiro A.</span>
+      <span class="lang-es">Todos los derechos reservados.</span>
+      <span class="lang-en">All rights reserved.</span>
+    </div>
+  </footer>
+
+  <!-- Video Modal (Easter Egg) -->
+  <div class="video-modal" id="mascot-video-modal">
+    <div class="video-modal-content">
+      <button class="video-close" id="close-video" aria-label="Cerrar video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <video id="mascot-gym-video" playsinline loop>
+        <source src="./images/mascota_oxyra_gym.mp4" type="video/mp4">
+        Tu navegador no soporta video.
+      </video>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // ── Notifications (Toast System) ────────────────────────────
+    function showToast(title, msg, iconType = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      
+      const iconSvg = iconType === 'download' 
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+      toast.innerHTML = `
+        <div class="toast-icon">${iconSvg}</div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          <div class="toast-msg">${msg}</div>
+        </div>
+      `;
+
+      container.appendChild(toast);
+      
+      // Trigger reflow for animation
+      setTimeout(() => toast.classList.add('visible'), 10);
+
+      // Auto-remove
+      setTimeout(() => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 500);
+      }, 4000);
+    }
+
+    // ── Store Buttons Logic ──────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      const appStoreBtns = document.querySelectorAll('.btn-app-store');
+      const playStoreBtns = document.querySelectorAll('.btn-play-store');
+      const mascotBtn = document.querySelector('.ai-mascot-img');
+      const videoModal = document.getElementById('mascot-video-modal');
+      const mascotVideo = document.getElementById('mascot-gym-video');
+      const closeVideoBtn = document.getElementById('close-video');
+      const currentLang = document.body.getAttribute('data-lang') || 'es';
+
+      // Mascot Sound System
+      const mascotSound = new Audio('./sound/mascota_oxyra_sound.mp3');
+      let isSoundPlaying = false;
+
+      mascotSound.onended = () => {
+        isSoundPlaying = false;
+      };
+
+      const playMascotSound = () => {
+        if (!isSoundPlaying) {
+          isSoundPlaying = true;
+          mascotSound.play().catch(e => {
+            // Browser might block auto-play until interaction
+            isSoundPlaying = false;
+          });
+        }
+      };
+
+      // Easter Egg: Mascot Video & Sound
+      if (mascotBtn && videoModal && mascotVideo) {
+        // Desktop Hover
+        mascotBtn.addEventListener('mouseenter', () => {
+          if (window.matchMedia('(pointer: fine)').matches) {
+            playMascotSound();
+          }
+        });
+
+        // Click Logic (Video for both, Sound only for mobile)
+        mascotBtn.addEventListener('click', () => {
+          // Open Video
+          videoModal.classList.add('active');
+          mascotVideo.play();
+          
+          showToast(
+            currentLang === 'es' ? 'Easter Egg!' : 'Easter Egg!',
+            currentLang === 'es' ? 'Descubriste el entrenamiento secreto.' : 'You discovered the secret workout.'
+          );
+
+          // Play Sound if on mobile/touch
+          if (!window.matchMedia('(pointer: fine)').matches) {
+            playMascotSound();
+          }
+        });
+
+        const closeVideo = () => {
+          videoModal.classList.remove('active');
+          mascotVideo.pause();
+          mascotVideo.currentTime = 0;
+        };
+
+        closeVideoBtn.addEventListener('click', closeVideo);
+        videoModal.addEventListener('click', (e) => {
+          if (e.target === videoModal) closeVideo();
+        });
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && videoModal.classList.contains('active')) closeVideo();
+        });
+      }
+
+      appStoreBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const title = currentLang === 'es' ? 'Abriendo App' : 'Opening App';
+          const msg = currentLang === 'es' 
+            ? 'Redirigiendo a la plataforma Oxyra...' 
+            : 'Redirecting to Oxyra platform...';
+          showToast(title, msg);
+        });
+      });
+
+      playStoreBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const title = currentLang === 'es' ? 'Iniciando descarga' : 'Starting download';
+          const msg = currentLang === 'es' 
+            ? 'El archivo APK se está descargando...' 
+            : 'The APK file is downloading...';
+          showToast(title, msg, 'download');
+        });
+      });
+    });
+
+    // ── Language Toggle ──────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnEs = document.getElementById('btn-es');
+      const btnEn = document.getElementById('btn-en');
+      const body = document.body;
+
+      const savedLang = localStorage.getItem('oxyra-lang') || 'es';
+      setLanguage(savedLang);
+
+      btnEs.addEventListener('click', () => setLanguage('es'));
+      btnEn.addEventListener('click', () => setLanguage('en'));
+
+      function setLanguage(lang) {
+        body.setAttribute('data-lang', lang);
+        document.documentElement.lang = lang;
+        localStorage.setItem('oxyra-lang', lang);
+        btnEs.classList.toggle('active', lang === 'es');
+        btnEn.classList.toggle('active', lang === 'en');
+      }
+    });
+
+    // ── Scroll Reveal (IntersectionObserver) ────────────────────
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // ── Feature Tabs ─────────────────────────────────────────────
+    (function () {
+      const tabs = document.querySelectorAll('.feature-tab');
+      let currentFeature = '1';
+
+      tabs.forEach(tab => {
+        ['mouseenter', 'touchstart'].forEach(evt => {
+          tab.addEventListener(evt, (e) => {
+            if (evt === 'touchstart') e.preventDefault();
+            const featureId = tab.dataset.feature;
+            if (featureId === currentFeature) return;
+
+            document.querySelector('.feature-tab.active')?.classList.remove('active');
+            document.querySelector('.feature-display.active')?.classList.remove('active');
+
+            tab.classList.add('active');
+            document.getElementById('display-' + featureId)?.classList.add('active');
+            currentFeature = featureId;
+          });
+        });
+      });
+    })();
+
+    // ── Subtle parallax on hero phone ────────────────────────────
+    (function () {
+      const heroVisual = document.querySelector('.hero-visual');
+      if (!heroVisual || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const scrollY = window.scrollY;
+            const offset = scrollY * 0.12;
+            heroVisual.style.transform = `translateY(${offset}px)`;
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+    })();
+  </script>
+</body>
+
+</html>

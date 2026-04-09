@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "10526660708",
+    "project_id": "oxyra-5fbbb",
+    "storage_bucket": "oxyra-5fbbb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:10526660708:android:f0c3d5ff605a739d4f2771",
+        "android_client_info": {
+          "package_name": "com.oxyra.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdRx5DGQMAp_m_UoiPeNk8qdUkGfZm_vs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:10526660708:android:74deda1da46d61694f2771",
+        "android_client_info": {
+          "package_name": "com.oxyra.app.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdRx5DGQMAp_m_UoiPeNk8qdUkGfZm_vs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

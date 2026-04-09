@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Oxyra</string>
+    <string name="title_activity_main">Oxyra</string>
+    <string name="package_name">com.oxyra.app</string>
+    <string name="custom_url_scheme">com.oxyra.app</string>
+
+    <!--
+        GOOGLE SIGN-IN: server_client_id DEBE ser el Web Client ID (no el Android).
+        El plugin @codetrix-studio/capacitor-google-auth lo lee desde aquí en runtime
+        para configurar el GoogleSignInClient y generar el idToken del servidor.
+    -->
+    <string name="server_client_id">347793586128-k66ji06lfekp2cc9ipd2g7tsvnht739q.apps.googleusercontent.com</string>
+</resources>
