@@ -20,7 +20,7 @@ jobs:
 
       - name: Instalar Dependencias del Frontend
         working-directory: ./frontend
-        run: npm install
+        run: npm i --legacy-peer-deps
 
       - name: Compilar Frontend (Vite)
         working-directory: ./frontend
